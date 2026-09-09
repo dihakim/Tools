@@ -1,0 +1,10 @@
+{
+  "language": "fr",
+  "name": "French",
+  "stopwords": ["le","de","un","à","être","et","en","avoir","que","pour","dans","ce","il","qui","ne","sur","se","pas","plus",
+    "pouvoir","par","je","avec","tout","faire","son","mettre","autre","on","mais","nous","comme","ou","si","leur","y","dire",
+    "elle","devoir","avant","deux","même","prendre","aussi","celui","donner","bien","où","fois","vous","encore","nouveau",
+    "aller","cela","entre","premier","vouloir","déjà","grand","mon","me","moins","aucun","lui","temps","très","savoir",
+    "falloir","voir","quel","sans","raison","notre","dont","non","an","jour","monde","année","personne","état","depuis",
+    "quand","alors","donc","cette","ces","des","les","une","au","du"]
+}

@@ -1,0 +1,20 @@
+{
+  "signatures": [
+    {"type": "pdf", "extensions": ["pdf"], "magic_hex": ["25504446"]},
+    {"type": "png", "extensions": ["png"], "magic_hex": ["89504e470d0a1a0a"]},
+    {"type": "jpg", "extensions": ["jpg", "jpeg"], "magic_hex": ["ffd8ff"]},
+    {"type": "gif", "extensions": ["gif"], "magic_hex": ["474946383761", "474946383961"]},
+    {"type": "zip_family", "extensions": ["zip", "docx", "xlsx", "pptx", "apk", "jar"], "magic_hex": ["504b0304", "504b0506", "504b0708"]},
+    {"type": "elf", "extensions": ["elf", "so", "bin"], "magic_hex": ["7f454c46"]},
+    {"type": "pe_exe", "extensions": ["exe", "dll", "msi"], "magic_hex": ["4d5a"]},
+    {"type": "macho", "extensions": ["macho", "dylib"], "magic_hex": ["cffaedfe", "feedface", "cafebabe"]},
+    {"type": "gzip", "extensions": ["gz", "gzip"], "magic_hex": ["1f8b"]},
+    {"type": "rar", "extensions": ["rar"], "magic_hex": ["526172211a0700"]},
+    {"type": "sqlite", "extensions": ["db", "sqlite", "sqlite3"], "magic_hex": ["53514c69746520666f726d6174203300"]},
+    {"type": "mp3", "extensions": ["mp3"], "magic_hex": ["494433", "fffb"]},
+    {"type": "mp4", "extensions": ["mp4", "mov", "m4a"], "magic_hex": ["66747970"], "offset": 4},
+    {"type": "bmp", "extensions": ["bmp"], "magic_hex": ["424d"]},
+    {"type": "rtf", "extensions": ["rtf"], "magic_hex": ["7b5c72746631"]},
+    {"type": "ole_doc", "extensions": ["doc", "xls", "ppt", "msi"], "magic_hex": ["d0cf11e0a1b11ae1"]}
+  ]
+}

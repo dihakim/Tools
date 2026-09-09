@@ -1,0 +1,663 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ComplianceCheck</title>
+<style>
+  :root {
+    --bg: #0f1115; --panel: #171a21; --border: #2a2e37; --text: #e6e8ec; --muted: #8b93a1;
+    --accent: #4f8cff;
+    --clean: #3a7d44; --info: #4f8cff; --low: #d0a020; --medium: #d97a1f; --high: #d9481f; --critical: #c22b3a;
+  }
+  * { box-sizing: border-box; }
+  body { margin:0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: var(--bg); color: var(--text); }
+  header { padding: 20px 28px 0; border-bottom: 1px solid var(--border); }
+  header .top { display:flex; align-items:center; justify-content:space-between; padding-bottom: 14px; }
+  header h1 { font-size: 18px; margin: 0; font-weight: 600; }
+  header .tag { color: var(--muted); font-size: 13px; }
+  nav.tabs { display: flex; gap: 4px; }
+  nav.tabs button { background: none; border: none; color: var(--muted); padding: 10px 16px; font-size: 14px; cursor: pointer; border-bottom: 2px solid transparent; border-radius: 0; }
+  nav.tabs button.active { color: var(--text); border-bottom-color: var(--accent); font-weight: 600; }
+  nav.tabs button:hover { color: var(--text); opacity: 1; }
+  main { max-width: 1100px; margin: 0 auto; padding: 24px 28px 60px; }
+  .tabpage { display: none; }
+  .tabpage.active { display: block; }
+  .panel { background: var(--panel); border: 1px solid var(--border); border-radius: 10px; padding: 18px 20px; margin-bottom: 20px; }
+  .panel h3 { margin: 0 0 12px; font-size: 14px; color: var(--text); }
+  .panel p.hint { color: var(--muted); font-size: 12px; margin: -6px 0 12px; }
+  .scan-form { display: flex; gap: 10px; flex-wrap: wrap; align-items: end; }
+  .field { display: flex; flex-direction: column; gap: 4px; }
+  .field label { font-size: 12px; color: var(--muted); }
+  input[type=text], textarea { background: #10131a; border: 1px solid var(--border); color: var(--text); padding: 8px 10px; border-radius: 6px; font-size: 14px; }
+  input[type=text] { min-width: 280px; }
+  textarea { width: 100%; min-height: 90px; font-family: ui-monospace, monospace; resize: vertical; }
+  select { background: #10131a; border: 1px solid var(--border); color: var(--text); padding: 8px 10px; border-radius: 6px; font-size: 14px; }
+  button { background: var(--accent); border: none; color: white; padding: 9px 18px; border-radius: 6px; font-size: 14px; cursor: pointer; font-weight: 500; }
+  button.secondary { background: #2a2e37; }
+  button:hover { opacity: 0.9; }
+  button:disabled { opacity: 0.5; cursor: not-allowed; }
+  .checks { display:flex; gap: 14px; flex-wrap: wrap; margin-top: 4px; }
+  .checks label { font-size: 13px; color: var(--muted); display:flex; align-items:center; gap: 5px; }
+  .status { margin-top: 10px; font-size: 13px; color: var(--muted); }
+  .status.err { color: var(--critical); }
+  .status.ok { color: var(--clean); }
+
+  .cat-block { border: 1px solid var(--border); border-radius: 8px; padding: 10px 14px; margin-top: 10px; }
+  .cat-block summary { cursor: pointer; font-size: 13px; font-weight: 600; color: var(--text); }
+  .cat-block .checks { margin-top: 10px; padding-left: 4px; }
+  .pii-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 6px 14px; margin-top: 10px; }
+  .pii-grid label { font-size: 13px; color: var(--muted); display:flex; align-items:center; gap: 5px; }
+
+  .summary-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 12px; }
+  .stat { background: #10131a; border: 1px solid var(--border); border-radius: 8px; padding: 12px 14px; text-align: center; }
+  .stat .n { font-size: 24px; font-weight: 700; }
+  .stat .l { font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: .04em; margin-top: 2px; }
+  .stat.clean .n { color: var(--clean); } .stat.info .n { color: var(--info); } .stat.low .n { color: var(--low); }
+  .stat.medium .n { color: var(--medium); } .stat.high .n { color: var(--high); } .stat.critical .n { color: var(--critical); }
+
+  .toolbar { display: flex; gap: 10px; align-items: center; margin-bottom: 14px; flex-wrap: wrap; }
+  .toolbar input[type=text] { min-width: 220px; }
+
+  .category { margin-bottom: 18px; }
+  .category h2 { font-size: 14px; text-transform: uppercase; letter-spacing: .05em; color: var(--muted); margin: 0 0 8px; }
+  .finding { background: var(--panel); border: 1px solid var(--border); border-left: 4px solid var(--muted); border-radius: 6px; padding: 10px 14px; margin-bottom: 8px; cursor: pointer; }
+  .finding.clean { border-left-color: var(--clean); } .finding.info { border-left-color: var(--info); }
+  .finding.low { border-left-color: var(--low); } .finding.medium { border-left-color: var(--medium); }
+  .finding.high { border-left-color: var(--high); } .finding.critical { border-left-color: var(--critical); }
+  .finding-head { display:flex; justify-content: space-between; gap: 10px; align-items:baseline; }
+  .finding-title { font-size: 14px; font-weight: 600; }
+  .badge { font-size: 10px; text-transform: uppercase; letter-spacing: .04em; padding: 2px 7px; border-radius: 10px; color: #0f1115; font-weight: 700; }
+  .badge.clean { background: var(--clean); color: white; } .badge.info { background: var(--info); }
+  .badge.low { background: var(--low); } .badge.medium { background: var(--medium); }
+  .badge.high { background: var(--high); color: white; } .badge.critical { background: var(--critical); color: white; }
+  .finding-loc { font-size: 12px; color: var(--muted); margin-top: 2px; word-break: break-all; }
+  .finding-detail { font-size: 13px; color: var(--text); margin-top: 6px; display: none; }
+  .finding.expanded .finding-detail { display: block; }
+  .evidence { margin-top: 8px; background: #0b0d12; border-radius: 6px; padding: 8px 10px; font-family: ui-monospace, monospace; font-size: 12px; color: var(--muted); white-space: pre-wrap; word-break: break-all; }
+  .empty { color: var(--muted); font-size: 13px; padding: 8px 0; }
+  #results { display: none; }
+
+  .resultbox { margin-top: 12px; background: #0b0d12; border: 1px solid var(--border); border-radius: 8px; padding: 12px 14px; font-size: 13px; }
+  .resultbox .row { display:flex; justify-content: space-between; gap: 10px; margin-bottom: 6px; }
+  .resultbox .label { color: var(--muted); }
+  .resultbox pre { white-space: pre-wrap; word-break: break-all; font-family: ui-monospace, monospace; margin: 6px 0 0; color: var(--text); }
+  .warn-line { color: var(--high); font-size: 13px; margin-top: 4px; }
+  .candidate-row { display:flex; justify-content: space-between; gap: 10px; padding: 6px 0; border-bottom: 1px solid var(--border); font-size: 12px; }
+  .candidate-row:last-child { border-bottom: none; }
+  .candidate-row.best { color: var(--clean); font-weight: 600; }
+  .inline-row { display: flex; gap: 10px; flex-wrap: wrap; align-items: end; margin-bottom: 10px; }
+</style>
+</head>
+<body>
+<header>
+  <div class="top">
+    <h1>ComplianceCheck</h1>
+    <span class="tag">Offline &middot; runs entirely on this machine, nothing leaves it</span>
+  </div>
+  <nav class="tabs">
+    <button class="active" onclick="showTab('scan')">Scan</button>
+    <button onclick="showTab('cipher')">Cipher Tools</button>
+    <button onclick="showTab('tools')">Forensic Tools</button>
+  </nav>
+</header>
+<main>
+
+<!-- ============================= SCAN TAB ============================= -->
+<div class="tabpage active" id="tab-scan">
+  <div class="panel">
+    <div class="scan-form">
+      <div class="field">
+        <label for="target">Target path (file or folder)</label>
+        <div style="display:flex; gap:6px;">
+          <input type="text" id="target" placeholder="/home/you/Documents">
+          <button type="button" class="secondary" onclick="browseTarget()" id="browseBtn">Browse&hellip;</button>
+        </div>
+      </div>
+      <div class="field">
+        <label>Selecting</label>
+        <div style="display:flex; gap:12px; padding:8px 0; font-size:13px;">
+          <label style="display:flex; align-items:center; gap:5px; color:var(--text); font-size:13px;">
+            <input type="radio" name="browseMode" value="folder" checked> Folder
+          </label>
+          <label style="display:flex; align-items:center; gap:5px; color:var(--text); font-size:13px;">
+            <input type="radio" name="browseMode" value="files"> File(s)
+          </label>
+        </div>
+      </div>
+      <div class="field">
+        <label for="minSeverity">Minimum severity to show</label>
+        <select id="minSeverity">
+          <option value="clean">All (incl. clean)</option>
+          <option value="low" selected>Low+</option>
+          <option value="medium">Medium+</option>
+          <option value="high">High+</option>
+          <option value="critical">Critical only</option>
+        </select>
+      </div>
+      <button id="scanBtn" onclick="runScan()">Scan</button>
+    </div>
+    <div class="checks">
+      <label><input type="checkbox" class="cat-toggle" value="files" checked onchange="toggleCatBlock('files')"> Storage / Files</label>
+      <label><input type="checkbox" class="cat-toggle" value="network" checked onchange="toggleCatBlock('network')"> Network</label>
+      <label><input type="checkbox" class="cat-toggle" value="software" checked onchange="toggleCatBlock('software')"> Software</label>
+      <label><input type="checkbox" class="cat-toggle" value="hardware" checked onchange="toggleCatBlock('hardware')"> Hardware</label>
+    </div>
+
+    <p class="hint" style="margin-top:14px;">Pick exactly what to search for and include in the report - everything is on by default. Every check still runs; this only controls what's shown/saved.</p>
+    <div id="checksContainer"></div>
+
+    <div class="status" id="status"></div>
+  </div>
+
+  <div id="results">
+    <div class="panel">
+      <div class="summary-grid" id="summaryGrid"></div>
+    </div>
+    <div class="toolbar">
+      <input type="text" id="filterText" placeholder="Filter findings (path, title...)" oninput="renderFindings()">
+      <select id="filterCategory" onchange="renderFindings()">
+        <option value="">All categories</option>
+        <option value="storage">Storage</option>
+        <option value="network">Network</option>
+        <option value="software">Software</option>
+        <option value="hardware">Hardware</option>
+        <option value="users">Users</option>
+      </select>
+    </div>
+    <div id="categoryContainer"></div>
+  </div>
+</div>
+
+<!-- ============================ CIPHER TAB ============================ -->
+<div class="tabpage" id="tab-cipher">
+  <div class="panel">
+    <h3>Analyze - auto-detect + decode</h3>
+    <p class="hint">Paste text. Checks whether it already reads as a known language, tries every supported cipher (Caesar/ROT13/Atbash/Vigenère) if not, and separately looks for embedded encoded substrings (base64/hex/base32/binary/URL-encoding).</p>
+    <textarea id="analyzeInput" placeholder="Paste text to analyze..."></textarea>
+    <div style="margin-top:10px;"><button onclick="cipherAnalyze()">Analyze</button></div>
+    <div id="analyzeResult"></div>
+  </div>
+
+  <div class="panel">
+    <h3>Decode</h3>
+    <p class="hint">Pick a cipher. Leave the key blank for Caesar or Vigenère and it will attempt to recover the key automatically (brute force for Caesar, cryptanalysis for Vigenère) - useful when you know or suspect the cipher but not the key.</p>
+    <div class="inline-row">
+      <div class="field">
+        <label for="decodeMethod">Cipher / encoding</label>
+        <select id="decodeMethod" onchange="updateKeyVisibility('decode')">
+          <option value="caesar">Caesar</option>
+          <option value="rot13">ROT13</option>
+          <option value="atbash">Atbash</option>
+          <option value="vigenere">Vigenère</option>
+          <option value="base64">Base64</option>
+          <option value="hex">Hex</option>
+          <option value="base32">Base32</option>
+          <option value="binary">Binary (8-bit groups)</option>
+          <option value="url">URL encoding</option>
+        </select>
+      </div>
+      <div class="field" id="decodeKeyField">
+        <label for="decodeKey">Key (shift number for Caesar, word for Vigenère - leave blank if unknown)</label>
+        <input type="text" id="decodeKey" placeholder="e.g. 3, or SECRET">
+      </div>
+    </div>
+    <textarea id="decodeInput" placeholder="Paste ciphertext to decode..."></textarea>
+    <div style="margin-top:10px;"><button onclick="cipherDecode()">Decode</button></div>
+    <div id="decodeResult"></div>
+  </div>
+
+  <div class="panel">
+    <h3>Encode</h3>
+    <div class="inline-row">
+      <div class="field">
+        <label for="encodeMethod">Cipher / encoding</label>
+        <select id="encodeMethod" onchange="updateKeyVisibility('encode')">
+          <option value="caesar">Caesar</option>
+          <option value="rot13">ROT13</option>
+          <option value="atbash">Atbash</option>
+          <option value="vigenere">Vigenère</option>
+          <option value="base64">Base64</option>
+          <option value="hex">Hex</option>
+          <option value="base32">Base32</option>
+          <option value="binary">Binary (8-bit groups)</option>
+          <option value="url">URL encoding</option>
+        </select>
+      </div>
+      <div class="field" id="encodeKeyField">
+        <label for="encodeKey">Key (required for Caesar/Vigenère)</label>
+        <input type="text" id="encodeKey" placeholder="e.g. 3, or SECRET">
+      </div>
+    </div>
+    <textarea id="encodeInput" placeholder="Paste plaintext to encode..."></textarea>
+    <div style="margin-top:10px;"><button onclick="cipherEncode()">Encode</button></div>
+    <div id="encodeResult"></div>
+  </div>
+</div>
+
+<!-- ============================ TOOLS TAB ============================= -->
+<div class="tabpage" id="tab-tools">
+  <div class="panel">
+    <h3>File Hash Calculator</h3>
+    <p class="hint">Computes MD5 / SHA-1 / SHA-256 / SHA-512 for a file on this machine - standard integrity verification / fingerprinting.</p>
+    <div class="inline-row">
+      <div class="field"><label for="hashPath">File path</label><input type="text" id="hashPath" placeholder="/path/to/file"></div>
+      <button onclick="hashFile()">Calculate</button>
+    </div>
+    <div id="hashResult"></div>
+  </div>
+
+  <div class="panel">
+    <h3>Hash Identifier</h3>
+    <p class="hint">Guesses likely algorithm(s) from a bare hash string's length/format. Not certain by nature (e.g. MD5 and NTLM are both 32 hex chars) - shows every plausible match.</p>
+    <div class="inline-row">
+      <div class="field"><label for="hashGuessInput">Hash string</label><input type="text" id="hashGuessInput" placeholder="5f4dcc3b5aa765d61d8327deb882cf99"></div>
+      <button onclick="identifyHash()">Identify</button>
+    </div>
+    <div id="identifyResult"></div>
+  </div>
+
+  <div class="panel">
+    <h3>JWT Decoder</h3>
+    <p class="hint">Decodes a JWT's header and payload for inspection. Does NOT verify the signature (that needs the signing secret, which this tool never has) - flags alg=none and expired/not-yet-valid tokens.</p>
+    <textarea id="jwtInput" placeholder="Paste a JWT (header.payload.signature)..."></textarea>
+    <div style="margin-top:10px;"><button onclick="jwtDecode()">Decode</button></div>
+    <div id="jwtResult"></div>
+  </div>
+</div>
+
+</main>
+
+<script>
+// ============================= TABS =============================
+function showTab(name) {
+  document.querySelectorAll('.tabpage').forEach(el => el.classList.remove('active'));
+  document.querySelectorAll('nav.tabs button').forEach(el => el.classList.remove('active'));
+  document.getElementById('tab-' + name).classList.add('active');
+  event.target.classList.add('active');
+}
+
+function escapeHtml(s) {
+  return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+
+// ============================= SCAN TAB =============================
+let lastReport = null;
+let selectedTargets = [];
+let checkDefs = {};   // category -> [{id,label}]
+let piiTypes = [];    // [{id,label}]
+const sevRank = {clean:0, info:0, low:1, medium:2, high:3, critical:4};
+
+async function loadScanConfig() {
+  try {
+    const [checksResp, piiResp] = await Promise.all([
+      fetch('/api/checks').then(r => r.json()),
+      fetch('/api/pii/types').then(r => r.json())
+    ]);
+    checkDefs = checksResp;
+    piiTypes = Array.isArray(piiResp) ? piiResp : [];
+    renderChecksUI();
+  } catch (e) {
+    document.getElementById('checksContainer').innerHTML = '<p class="hint">Could not load check options: ' + escapeHtml(e.message) + '</p>';
+  }
+}
+
+const catLabels = {files: 'Storage / Files', network: 'Network', software: 'Software', hardware: 'Hardware'};
+
+function renderChecksUI() {
+  const container = document.getElementById('checksContainer');
+  container.innerHTML = '';
+  for (const cat of ['files', 'network', 'software', 'hardware']) {
+    const defs = checkDefs[cat] || [];
+    const details = document.createElement('details');
+    details.className = 'cat-block';
+    details.id = 'catblock-' + cat;
+    const summary = document.createElement('summary');
+    summary.textContent = catLabels[cat] + ' - what to search/include';
+    details.appendChild(summary);
+
+    const checksDiv = document.createElement('div');
+    checksDiv.className = 'checks';
+    for (const d of defs) {
+      const label = document.createElement('label');
+      label.innerHTML = `<input type="checkbox" class="check-${cat}" value="${d.id}" checked> ${escapeHtml(d.label)}`;
+      checksDiv.appendChild(label);
+    }
+    details.appendChild(checksDiv);
+
+    if (cat === 'files' && piiTypes.length > 0) {
+      const piiWrap = document.createElement('div');
+      piiWrap.innerHTML = '<p class="hint" style="margin-top:12px;">Search for specific PII types only (all selected by default):</p>';
+      const grid = document.createElement('div');
+      grid.className = 'pii-grid';
+      for (const p of piiTypes) {
+        const label = document.createElement('label');
+        label.innerHTML = `<input type="checkbox" class="pii-type" value="${p.id}" checked> ${escapeHtml(p.label)}`;
+        grid.appendChild(label);
+      }
+      piiWrap.appendChild(grid);
+      details.appendChild(piiWrap);
+    }
+
+    container.appendChild(details);
+  }
+}
+
+function toggleCatBlock(cat) {
+  const enabled = document.querySelector('.cat-toggle[value="' + cat + '"]').checked;
+  const block = document.getElementById('catblock-' + cat);
+  if (block) block.style.display = enabled ? '' : 'none';
+}
+
+function collectChecks() {
+  const checks = {};
+  for (const cat of ['files', 'network', 'software', 'hardware']) {
+    const boxes = document.querySelectorAll('.check-' + cat);
+    const all = Array.from(boxes);
+    const checked = all.filter(b => b.checked).map(b => b.value);
+    // Only send a restriction if something is actually deselected - all-checked means "everything," matching the backend's default.
+    if (checked.length < all.length) checks[cat] = checked;
+  }
+  return checks;
+}
+
+function collectPIITypes() {
+  const boxes = Array.from(document.querySelectorAll('.pii-type'));
+  const checked = boxes.filter(b => b.checked).map(b => b.value);
+  if (checked.length === 0 || checked.length === boxes.length) return []; // empty = "all" server-side
+  return checked;
+}
+
+async function browseTarget() {
+  const mode = document.querySelector('input[name=browseMode]:checked').value;
+  const status = document.getElementById('status');
+  const btn = document.getElementById('browseBtn');
+  btn.disabled = true;
+  const prevLabel = btn.textContent;
+  btn.textContent = 'Waiting for picker...';
+  status.className = 'status';
+  status.textContent = '';
+
+  try {
+    const resp = await fetch('/api/browse', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({mode})
+    });
+    const data = await resp.json();
+    if (data.error) {
+      status.className = 'status err';
+      status.textContent = 'No native file picker available on this system (' + data.error + '). Type the path manually instead.';
+      return;
+    }
+    if (!data.paths || data.paths.length === 0) {
+      status.textContent = 'Nothing selected.';
+      return;
+    }
+    selectedTargets = data.paths;
+    document.getElementById('target').value = data.paths.length > 1
+      ? data.paths.length + ' files selected: ' + data.paths.join(', ')
+      : data.paths[0];
+  } catch (e) {
+    status.className = 'status err';
+    status.textContent = 'Could not reach the browse endpoint: ' + e.message;
+  } finally {
+    btn.disabled = false;
+    btn.textContent = prevLabel;
+  }
+}
+
+async function runScan() {
+  const typedTarget = document.getElementById('target').value.trim();
+  const status = document.getElementById('status');
+  const btn = document.getElementById('scanBtn');
+
+  let targets = selectedTargets;
+  const displayedSelection = selectedTargets.length > 1
+    ? selectedTargets.length + ' files selected: ' + selectedTargets.join(', ')
+    : (selectedTargets[0] || '');
+  if (typedTarget !== displayedSelection) {
+    targets = typedTarget ? [typedTarget] : [];
+  }
+
+  if (targets.length === 0) {
+    status.textContent = 'Enter a target path, or use Browse... to pick one.';
+    status.className = 'status err';
+    return;
+  }
+
+  const categories = Array.from(document.querySelectorAll('.cat-toggle:checked')).map(c => c.value);
+  if (categories.length === 0) { status.textContent = 'Pick at least one category.'; status.className = 'status err'; return; }
+
+  btn.disabled = true;
+  status.className = 'status';
+  status.textContent = 'Scanning... this can take a moment for large folders.';
+  document.getElementById('results').style.display = 'none';
+
+  try {
+    const resp = await fetch('/api/scan', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({
+        targets, categories,
+        checks: collectChecks(),
+        pii_types: collectPIITypes()
+      })
+    });
+    if (!resp.ok) {
+      const text = await resp.text();
+      throw new Error(text || ('HTTP ' + resp.status));
+    }
+    lastReport = await resp.json();
+    status.textContent = 'Scan complete.';
+    status.className = 'status ok';
+    document.getElementById('results').style.display = 'block';
+    renderSummary();
+    renderFindings();
+  } catch (e) {
+    status.className = 'status err';
+    status.textContent = 'Scan failed: ' + e.message;
+  } finally {
+    btn.disabled = false;
+  }
+}
+
+function renderSummary() {
+  const s = lastReport.summary;
+  const grid = document.getElementById('summaryGrid');
+  const order = ['clean','info','low','medium','high','critical'];
+  grid.innerHTML = `<div class="stat"><div class="n">${s.total_findings}</div><div class="l">Total findings</div></div>` +
+    `<div class="stat"><div class="n">${s.flagged_findings}</div><div class="l">Flagged</div></div>` +
+    order.map(sev => `<div class="stat ${sev}"><div class="n">${s.by_severity[sev] || 0}</div><div class="l">${sev}</div></div>`).join('');
+}
+
+function renderFindings() {
+  const minSev = sevRank[document.getElementById('minSeverity').value];
+  const filterText = document.getElementById('filterText').value.toLowerCase();
+  const filterCat = document.getElementById('filterCategory').value;
+  const container = document.getElementById('categoryContainer');
+  container.innerHTML = '';
+
+  const byCat = lastReport.findings_by_category;
+  const cats = filterCat ? [filterCat] : Object.keys(byCat);
+
+  for (const cat of cats) {
+    let items = (byCat[cat] || []).filter(f => sevRank[f.severity] >= minSev);
+    if (filterText) {
+      items = items.filter(f => (f.title + ' ' + (f.location||'') + ' ' + (f.detail||'')).toLowerCase().includes(filterText));
+    }
+    if (items.length === 0) continue;
+
+    const section = document.createElement('div');
+    section.className = 'category';
+    section.innerHTML = `<h2>${cat} (${items.length})</h2>`;
+    for (const f of items) {
+      const div = document.createElement('div');
+      div.className = 'finding ' + f.severity;
+      div.onclick = () => div.classList.toggle('expanded');
+      div.innerHTML = `
+        <div class="finding-head">
+          <span class="finding-title">${escapeHtml(f.title)}</span>
+          <span class="badge ${f.severity}">${f.severity}</span>
+        </div>
+        ${f.location ? `<div class="finding-loc">${escapeHtml(f.location)}</div>` : ''}
+        <div class="finding-detail">
+          ${f.detail ? `<div>${escapeHtml(f.detail)}</div>` : ''}
+          ${f.evidence ? `<div class="evidence">${escapeHtml(JSON.stringify(f.evidence, null, 2))}</div>` : ''}
+        </div>`;
+      section.appendChild(div);
+    }
+    container.appendChild(section);
+  }
+  if (container.innerHTML === '') {
+    container.innerHTML = '<div class="empty">No findings match the current filters.</div>';
+  }
+}
+
+// ============================ CIPHER TAB =============================
+function updateKeyVisibility(prefix) {
+  const method = document.getElementById(prefix + 'Method').value;
+  const field = document.getElementById(prefix + 'KeyField');
+  field.style.display = (method === 'caesar' || method === 'vigenere') ? '' : 'none';
+}
+updateKeyVisibility('decode');
+updateKeyVisibility('encode');
+
+async function postJSON(url, body) {
+  const resp = await fetch(url, {method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(body)});
+  return resp.json();
+}
+
+async function cipherAnalyze() {
+  const text = document.getElementById('analyzeInput').value;
+  const out = document.getElementById('analyzeResult');
+  if (!text.trim()) { out.innerHTML = '<p class="hint">Enter some text first.</p>'; return; }
+  out.innerHTML = '<p class="hint">Analyzing...</p>';
+
+  const data = await postJSON('/api/cipher/analyze', {text});
+  let html = '<div class="resultbox">';
+
+  if (data.input_language) {
+    html += `<div class="row"><span class="label">Already reads as</span><span>${data.input_language.language_name} (confidence ${(data.input_language.confidence*100).toFixed(0)}%)</span></div>`;
+    html += '<p class="hint">This text already matches a known language - probably not ciphered.</p>';
+  } else if (data.classical_crack) {
+    const c = data.classical_crack;
+    html += `<div class="row"><span class="label">Likely cipher</span><span><strong>${c.method}</strong>${c.key ? ' (key: ' + escapeHtml(c.key) + ')' : ''}</span></div>`;
+    html += `<div class="row"><span class="label">Decoded language</span><span>${c.language} (confidence ${(c.confidence*100).toFixed(0)}%)</span></div>`;
+    html += `<div class="label">Most likely meaning:</div><pre>${escapeHtml(c.plaintext)}</pre>`;
+  } else {
+    html += '<p class="hint">Doesn\'t match a known language, and automatic cracking (Caesar/ROT13/Atbash/Vigenère) found no confident decode. Could be a different cipher, an unsupported language, or random data.</p>';
+  }
+
+  if (data.encodings && data.encodings.length > 0) {
+    html += '<div class="label" style="margin-top:10px;">Encoded substrings found:</div>';
+    for (const e of data.encodings) {
+      html += `<div class="candidate-row"><span>${e.type}${e.looks_meaningful ? ' (decoded to readable text)' : ''}</span><span>${escapeHtml(e.decoded || e.sample)}</span></div>`;
+    }
+  }
+  html += '</div>';
+  out.innerHTML = html;
+}
+
+async function cipherDecode() {
+  const method = document.getElementById('decodeMethod').value;
+  const text = document.getElementById('decodeInput').value;
+  const key = document.getElementById('decodeKey').value;
+  const out = document.getElementById('decodeResult');
+  if (!text.trim()) { out.innerHTML = '<p class="hint">Enter ciphertext first.</p>'; return; }
+  out.innerHTML = '<p class="hint">Decoding...</p>';
+
+  const data = await postJSON('/api/cipher/decode', {method, text, key});
+  let html = '<div class="resultbox">';
+  if (data.error) {
+    html += `<div class="status err">${escapeHtml(data.error)}</div>`;
+  } else if (data.success) {
+    if (data.key_used) html += `<div class="row"><span class="label">Key used</span><span>${escapeHtml(data.key_used)}</span></div>`;
+    if (data.note) html += `<p class="hint">${escapeHtml(data.note)}</p>`;
+    html += `<div class="label">Plaintext:</div><pre>${escapeHtml(data.plaintext)}</pre>`;
+  } else {
+    if (data.note) html += `<p class="hint">${escapeHtml(data.note)}</p>`;
+  }
+  if (data.candidates && data.candidates.length > 0) {
+    html += '<div class="label" style="margin-top:10px;">All 25 Caesar shifts (best-scoring first):</div>';
+    data.candidates.slice(0, 25).forEach((c, i) => {
+      html += `<div class="candidate-row${i===0 ? ' best' : ''}"><span>shift ${c.shift}${c.language ? ' (' + c.language + ')' : ''}</span><span>${escapeHtml(c.plaintext.slice(0,60))}</span></div>`;
+    });
+  }
+  html += '</div>';
+  out.innerHTML = html;
+}
+
+async function cipherEncode() {
+  const method = document.getElementById('encodeMethod').value;
+  const text = document.getElementById('encodeInput').value;
+  const key = document.getElementById('encodeKey').value;
+  const out = document.getElementById('encodeResult');
+  if (!text.trim()) { out.innerHTML = '<p class="hint">Enter plaintext first.</p>'; return; }
+  out.innerHTML = '<p class="hint">Encoding...</p>';
+
+  const data = await postJSON('/api/cipher/encode', {method, text, key});
+  let html = '<div class="resultbox">';
+  if (data.error) {
+    html += `<div class="status err">${escapeHtml(data.error)}</div>`;
+  } else {
+    html += `<div class="label">Encoded:</div><pre>${escapeHtml(data.encoded)}</pre>`;
+  }
+  html += '</div>';
+  out.innerHTML = html;
+}
+
+// ============================ TOOLS TAB ==============================
+async function hashFile() {
+  const path = document.getElementById('hashPath').value.trim();
+  const out = document.getElementById('hashResult');
+  if (!path) { out.innerHTML = '<p class="hint">Enter a file path first.</p>'; return; }
+  out.innerHTML = '<p class="hint">Hashing...</p>';
+
+  const data = await postJSON('/api/tools/hash', {path});
+  if (data.error) { out.innerHTML = `<div class="status err">${escapeHtml(data.error)}</div>`; return; }
+  out.innerHTML = `<div class="resultbox">
+    <div class="row"><span class="label">Size</span><span>${data.size_bytes} bytes</span></div>
+    <div class="row"><span class="label">MD5</span><span>${data.md5}</span></div>
+    <div class="row"><span class="label">SHA-1</span><span>${data.sha1}</span></div>
+    <div class="row"><span class="label">SHA-256</span><span>${data.sha256}</span></div>
+    <div class="row"><span class="label">SHA-512</span><span style="word-break:break-all; max-width:60%;">${data.sha512}</span></div>
+  </div>`;
+}
+
+async function identifyHash() {
+  const hash = document.getElementById('hashGuessInput').value.trim();
+  const out = document.getElementById('identifyResult');
+  if (!hash) { out.innerHTML = '<p class="hint">Enter a hash string first.</p>'; return; }
+
+  const data = await postJSON('/api/tools/identify-hash', {hash});
+  if (!data.likely_algorithms || data.likely_algorithms.length === 0) {
+    out.innerHTML = '<div class="resultbox">No known hash format matched this string\'s length/pattern.</div>';
+    return;
+  }
+  out.innerHTML = `<div class="resultbox"><div class="label">Likely:</div><pre>${data.likely_algorithms.join(', ')}</pre></div>`;
+}
+
+async function jwtDecode() {
+  const token = document.getElementById('jwtInput').value.trim();
+  const out = document.getElementById('jwtResult');
+  if (!token) { out.innerHTML = '<p class="hint">Paste a JWT first.</p>'; return; }
+
+  const data = await postJSON('/api/tools/jwt-decode', {token});
+  if (data.error) { out.innerHTML = `<div class="status err">${escapeHtml(data.error)}</div>`; return; }
+  let html = '<div class="resultbox">';
+  html += `<div class="label">Header:</div><pre>${escapeHtml(JSON.stringify(data.header, null, 2))}</pre>`;
+  html += `<div class="label" style="margin-top:8px;">Payload:</div><pre>${escapeHtml(JSON.stringify(data.payload, null, 2))}</pre>`;
+  if (data.warnings && data.warnings.length > 0) {
+    for (const w of data.warnings) html += `<div class="warn-line">&#9888; ${escapeHtml(w)}</div>`;
+  }
+  html += '<p class="hint" style="margin-top:8px;">Signature was not verified - this tool never has the signing secret.</p>';
+  html += '</div>';
+  out.innerHTML = html;
+}
+
+// ============================== INIT ==================================
+loadScanConfig();
+</script>
+</body>
+</html>
