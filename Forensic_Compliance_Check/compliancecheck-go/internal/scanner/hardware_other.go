@@ -15,6 +15,10 @@ func scanMemory() []model.Finding          { return []model.Finding{hwNotImpleme
 func scanStorage() []model.Finding         { return []model.Finding{hwNotImplemented("storage")} }
 func scanUSB() []model.Finding             { return []model.Finding{hwNotImplemented("usb")} }
 func scanDiskEncryption() []model.Finding  { return []model.Finding{hwNotImplemented("disk_encryption")} }
+func scanPCI() []model.Finding             { return []model.Finding{hwNotImplemented("pci")} }
+func scanCPUVulnerabilities() []model.Finding { return []model.Finding{hwNotImplemented("hw_cpu_vulnerabilities")} }
+func scanTPM() []model.Finding             { return []model.Finding{hwNotImplemented("tpm")} }
+func scanSecureBoot() []model.Finding      { return []model.Finding{hwNotImplemented("secure_boot")} }
 
 func hwNotImplemented(what string) model.Finding {
 	f := model.NewFinding(model.CategoryHardware, what+"_not_implemented", "Hardware "+what+" scan not yet implemented on this OS", model.SeverityInfo)

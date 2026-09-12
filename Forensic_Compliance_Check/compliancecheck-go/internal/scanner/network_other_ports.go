@@ -19,3 +19,10 @@ func scanListeningPorts() []model.Finding {
 	f.Detail = "Linux reads /proc/net/tcp directly; macOS/Windows need a platform-specific implementation not yet built."
 	return []model.Finding{f}
 }
+
+func scanWiFiProfiles() []model.Finding {
+	f := model.NewFinding(model.CategoryNetwork, "wifi_profiles_not_implemented", "Saved WiFi profile extraction not yet implemented on this OS", model.SeverityInfo)
+	f.Source = "network.wifi"
+	f.Detail = "Linux reads NetworkManager's connection files directly. macOS keeps WiFi passwords in the Keychain (needs `security find-generic-password` or Keychain Services API - not yet built). Windows keeps them in the WLAN AutoConfig store (needs `netsh wlan show profile key=clear`, which requires admin and is per-profile - not yet built)."
+	return []model.Finding{f}
+}

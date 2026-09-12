@@ -11,6 +11,7 @@ import (
 	"strings"
 	"syscall"
 
+	"compliancecheck/internal/hwintel"
 	"compliancecheck/internal/model"
 )
 
@@ -108,10 +109,25 @@ func scanUSB() []model.Finding {
 		finding.Source = "hardware.usb"
 		finding.Location = name
 		label := strings.TrimSpace(manufacturer + " " + productName)
+		registryClass := ""
+		if label == "" {
+			// The device didn't self-report friendly strings (common for cheap/
+			// generic hardware) - fall back to the offline vendor/product ID
+			// registry before giving up and showing raw hex IDs.
+			if reg, ok := hwintel.LookupUSBDevice(vendor, product); ok {
+				label = strings.TrimSpace(reg.VendorNameOr(vendor) + " " + reg.ProductNameOr(product))
+				registryClass = reg.DeviceClass
+				finding.Evidence["registry_device_class"] = registryClass
+			}
+		}
 		if label == "" {
 			label = "vendor:" + vendor + " product:" + product
 		}
 		finding.Detail = label
+		if looksLikeSuspiciousDevice(label) {
+			finding.Severity = model.SeverityMedium
+			finding.Detail = label + " - device/vendor registry entry itself is flagged as suspicious (counterfeit/fake indicator in the name)"
+		}
 		finding.Evidence["id_vendor"] = vendor
 		finding.Evidence["id_product"] = product
 		finding.Evidence["manufacturer"] = manufacturer
@@ -135,4 +151,14 @@ func readSysAttr(path string) string {
 		return ""
 	}
 	return strings.TrimSpace(string(b))
+}
+
+func looksLikeSuspiciousDevice(label string) bool {
+	lower := strings.ToLower(label)
+	for _, kw := range []string{"counterfeit", "fake", "clone", "malicious", "rogue"} {
+		if strings.Contains(lower, kw) {
+			return true
+		}
+	}
+	return false
 }

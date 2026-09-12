@@ -29,7 +29,7 @@ var storageChecks = []CheckDefinition{
 	{ID: "pii", Label: "PII detection", Prefixes: []string{"pii_"}},
 	{ID: "encoded_content", Label: "Encoded content (base64/hex/etc.)", Prefixes: []string{"encoded_content_"}},
 	{ID: "cipher", Label: "Cipher detection/cracking", Prefixes: []string{"cipher_cracked_", "unrecognized_language"}},
-	{ID: "entropy", Label: "High-entropy content", Prefixes: []string{"high_entropy_content"}},
+	{ID: "entropy", Label: "High-entropy content", Prefixes: []string{"high_entropy_content", "entropy_spike"}},
 	{ID: "extraction", Label: "Text extraction issues", Prefixes: []string{"extraction_"}},
 }
 
@@ -38,6 +38,7 @@ var networkChecks = []CheckDefinition{
 	{ID: "hosts_file", Label: "Hosts file", Prefixes: []string{"hosts_entry", "hosts_file_"}},
 	{ID: "dns", Label: "DNS resolvers", Prefixes: []string{"dns_"}},
 	{ID: "listening_ports", Label: "Listening ports", Prefixes: []string{"listening_port"}},
+	{ID: "wifi", Label: "Saved WiFi profiles", Prefixes: []string{"wifi_"}},
 }
 
 var softwareChecks = []CheckDefinition{
@@ -52,6 +53,10 @@ var hardwareChecks = []CheckDefinition{
 	{ID: "memory", Label: "Memory", Prefixes: []string{"memory"}},
 	{ID: "storage_volumes", Label: "Storage volumes", Prefixes: []string{"storage_volume", "storage_unreadable"}},
 	{ID: "usb", Label: "USB devices", Prefixes: []string{"usb_"}},
+	{ID: "pci", Label: "PCI devices", Prefixes: []string{"pci_"}},
+	{ID: "cpu_vulnerabilities", Label: "CPU vulnerabilities (Spectre/Meltdown/etc.)", Prefixes: []string{"hw_cpu_vulnerabilit"}},
+	{ID: "tpm", Label: "TPM", Prefixes: []string{"tpm_"}},
+	{ID: "secure_boot", Label: "Secure Boot", Prefixes: []string{"secure_boot_"}},
 	{ID: "encryption", Label: "Disk encryption", Prefixes: []string{"disk_encryption"}},
 }
 

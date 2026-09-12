@@ -15,7 +15,11 @@ import (
 	"compliancecheck/internal/langdetect"
 )
 
-var SupportedMethods = []string{"base64", "hex", "base32", "binary", "url", "rot13", "atbash", "caesar", "vigenere"}
+var SupportedMethods = []string{
+	"base64", "hex", "base32", "binary", "url",
+	"rot13", "atbash", "caesar", "vigenere",
+	"morse", "octal", "decimal", "leetspeak", "xor",
+}
 
 type DecodeResult struct {
 	Method     string             `json:"method"`
@@ -51,6 +55,15 @@ func Decode(method, text, key string, det *langdetect.Detector) DecodeResult {
 	case "url":
 		p, err := URLDecode(text)
 		return finishDecode(res, p, err)
+	case "morse":
+		p, err := MorseDecode(text)
+		return finishDecode(res, p, err)
+	case "octal":
+		p, err := OctalDecode(text)
+		return finishDecode(res, p, err)
+	case "decimal":
+		p, err := DecimalDecode(text)
+		return finishDecode(res, p, err)
 
 	case "rot13":
 		res.Success = true
@@ -62,6 +75,40 @@ func Decode(method, text, key string, det *langdetect.Detector) DecodeResult {
 		res.Success = true
 		res.Plaintext = Atbash(text)
 		res.Note = "Atbash has no key - it's a fixed mirror substitution (A<->Z, B<->Y, ...)."
+		return res
+
+	case "leetspeak":
+		res.Success = true
+		res.Plaintext = LeetspeakReverse(text)
+		res.Note = "Leetspeak isn't a strict reversible cipher (e.g. '1' could mean 'i' or 'l') - this is a best-effort common-substitution reversal, not a guaranteed-correct decode."
+		return res
+
+	case "xor":
+		if strings.TrimSpace(key) == "" {
+			crack, ok := CrackXORSingleByte(text, det)
+			if !ok {
+				res.Note = "No key given, and brute-forcing all 255 single-byte XOR keys found no confident match. Input must be hex-encoded ciphertext; this only cracks single-byte keys, not repeating multi-byte keys."
+				return res
+			}
+			res.Success = true
+			res.Plaintext = crack.Plaintext
+			res.KeyUsed = crack.Key + " (decimal byte value)"
+			res.Note = "No key given - brute-forced all 255 single-byte XOR keys and validated the result as real text."
+			return res
+		}
+		keyByte, err := strconv.Atoi(strings.TrimSpace(key))
+		if err != nil || keyByte < 0 || keyByte > 255 {
+			res.Error = "XOR key must be a byte value 0-255, got: " + key
+			return res
+		}
+		p, err := XORDecodeHex(text, byte(keyByte))
+		if err != nil {
+			res.Error = "input must be hex-encoded ciphertext: " + err.Error()
+			return res
+		}
+		res.Success = true
+		res.Plaintext = p
+		res.KeyUsed = strconv.Itoa(keyByte)
 		return res
 
 	case "caesar":
@@ -137,7 +184,7 @@ func Analyze(text string, det *langdetect.Detector) AnalyzeResult {
 		res.ClassicalCrack = &crack
 	}
 
-	res.Encodings = detectEncodings(text)
+	res.Encodings = detectEncodings(text, det)
 	return res
 }
 
@@ -178,6 +225,18 @@ func Encode(method, text, key string) EncodeResult {
 	case "url":
 		res.Success = true
 		res.Encoded = URLEncode(text)
+	case "morse":
+		res.Success = true
+		res.Encoded = MorseEncode(text)
+	case "octal":
+		res.Success = true
+		res.Encoded = OctalEncode(text)
+	case "decimal":
+		res.Success = true
+		res.Encoded = DecimalEncode(text)
+	case "leetspeak":
+		res.Success = true
+		res.Encoded = ToLeetspeak(text)
 	case "rot13":
 		res.Success = true
 		res.Encoded = ROT13(text)
@@ -199,6 +258,18 @@ func Encode(method, text, key string) EncodeResult {
 		}
 		res.Success = true
 		res.Encoded = VigenereEncode(text, key)
+	case "xor":
+		if strings.TrimSpace(key) == "" {
+			res.Error = "XOR encoding requires a key (byte value 0-255)"
+			return res
+		}
+		keyByte, err := strconv.Atoi(strings.TrimSpace(key))
+		if err != nil || keyByte < 0 || keyByte > 255 {
+			res.Error = fmt.Sprintf("XOR key must be a byte value 0-255, got: %q", key)
+			return res
+		}
+		res.Success = true
+		res.Encoded = XOREncode(text, byte(keyByte))
 	default:
 		res.Error = "unknown method: " + method + " (supported: " + strings.Join(SupportedMethods, ", ") + ")"
 	}

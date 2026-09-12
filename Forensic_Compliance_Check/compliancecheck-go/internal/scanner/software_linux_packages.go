@@ -26,6 +26,7 @@ import (
 	"strconv"
 	"strings"
 
+	"compliancecheck/internal/hwintel"
 	"compliancecheck/internal/model"
 )
 
@@ -68,6 +69,29 @@ func scanSoftwarePackages() []model.Finding {
 			f.Evidence["status"] = p.status
 			out = append(out, f)
 		}
+
+		// Cross-reference against the bundled blacklist/CVE reference data.
+		// Small sample dataset (see internal/hwintel) - a hit is meaningful,
+		// but a miss proves nothing (absence isn't evidence of safety).
+		for _, bl := range hwintel.MatchBlacklist(p.name) {
+			bf := model.NewFinding(model.CategorySoftware, "package_blacklisted", "Installed package matches known-bad reference entry", severityFromString(bl.Severity))
+			bf.Source = "software.packages"
+			bf.Location = p.name
+			bf.Detail = p.name + " matches blacklist entry \"" + bl.EntityName + "\" (" + bl.EntityType + "): " + bl.Reason
+			bf.Evidence["blacklist_source"] = bl.Source
+			out = append(out, bf)
+		}
+		for _, cve := range hwintel.MatchSoftwareCVEs(p.name) {
+			cf := model.NewFinding(model.CategorySoftware, "package_known_cve", "Installed package matches a known CVE reference (sample dataset)", severityFromString(cve.Severity))
+			cf.Source = "software.packages"
+			cf.Location = p.name
+			cf.Detail = p.name + " - " + cve.CVEID + ": " + cve.Description + " (CVSS " + strconv.FormatFloat(cve.CVSSScore, 'f', 1, 64) + ") - this is a small bundled sample, not a live/current CVE feed; verify against NVD before acting."
+			cf.Evidence["cve_id"] = cve.CVEID
+			cf.Evidence["cvss_score"] = cve.CVSSScore
+			cf.Evidence["exploit_available"] = cve.ExploitAvailable == 1
+			cf.Evidence["has_patch"] = cve.HasPatch == 1
+			out = append(out, cf)
+		}
 	}
 
 	summary := model.NewFinding(model.CategorySoftware, "installed_packages_summary", "Installed software inventory", model.SeverityClean)
@@ -80,6 +104,21 @@ func scanSoftwarePackages() []model.Finding {
 	out = append(out, summary)
 
 	return out
+}
+
+func severityFromString(s string) model.Severity {
+	switch strings.ToLower(s) {
+	case "critical":
+		return model.SeverityCritical
+	case "high":
+		return model.SeverityHigh
+	case "medium":
+		return model.SeverityMedium
+	case "low":
+		return model.SeverityLow
+	default:
+		return model.SeverityMedium
+	}
 }
 
 func packageList(pkgs []pkgInfo) []string {

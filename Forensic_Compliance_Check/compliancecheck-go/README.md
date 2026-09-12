@@ -166,7 +166,120 @@ natively.
   - Disk encryption presence heuristic (device-mapper/LUKS detection +
     /etc/crypttab) - explicitly labeled as heuristic, not authoritative
 
+## Hardware/software intelligence (internal/hwintel), from real reference data
+
+Diana supplied a hardware/software intelligence export - static reference
+data, not a live feed. Wired in:
+
+  - MAC OUI vendor lookup (~11,000 prefixes) - every network interface's
+    MAC address gets a vendor name where recognized.
+  - USB vendor/product ID registry (~10,000 entries) - fills in a device
+    name when the hardware itself doesn't report a friendly string.
+    Notably also flags devices whose registry entry is itself marked
+    suspicious (e.g. a "Counterfeit flash drive" product-name match) at
+    MEDIUM instead of just displaying it inertly.
+  - PCI device scanner (NEW capability) - enumerates /sys/bus/pci/devices
+    directly (no lspci/exec needed) and cross-references the ~10,000-row
+    PCI registry for vendor/device names.
+  - CPU vulnerability scanner (NEW capability) - reads Linux's own
+    /sys/devices/system/cpu/vulnerabilities/* (the kernel's authoritative,
+    current mitigation status - always more accurate than matching CPU
+    model strings against a static list) and cross-references bundled
+    Spectre/Meltdown/Foreshadow CVE data for context. Verified catching a
+    real partially-unmitigated status (a composite "Mitigation: ..."
+    string that contained "BHI: Vulnerable" as a sub-component) that a
+    naive "starts with Mitigation = fine" check would have missed.
+  - Software blacklist/whitelist/CVE cross-referencing - installed
+    packages get checked against bundled known-bad publisher/tool names,
+    trusted-publisher whitelist, and a small CVE reference set. Verified
+    matching correctly (e.g. "UltraSurf" -> blacklist hit, "Microsoft" ->
+    whitelist hit, "Chrome" -> CVE hits). This is explicitly a small
+    SAMPLE dataset (~15-85 entries per table), not a live threat-intel
+    feed - a match is meaningful, a miss proves nothing.
+
+All registries are coverage snapshots (the hardware export was itself
+capped at 10,000 rows per table out of larger source tables), not
+exhaustive - a lookup miss just means "not in this snapshot," not
+"verified clean."
+
+## Bigram-based cipher-crack validation (internal/ngram), from real corpus data
+
+Real English (~5,000 entries) and French (~10,000 entries) bigram
+frequency data, sourced from corpus frequency exports. This exists
+specifically to hardstop a recurring class of bug: the classical-cipher
+auto-crack validation (Caesar/Vigenère/XOR) originally relied only on a
+naive "fraction of tokens matching a stopword list" score, which proved
+exploitable twice during testing - garbled, wrong-key decode output could
+rack up enough coincidental single-word matches to outscore the correct
+decode. Real bigrams are a much harder target to hit by chance (two
+specific consecutive words matching, not one), so for English/French
+specifically, a crack candidate now also has to clear a minimum
+real-bigram-pair ratio before being trusted. Spanish/German don't have
+bigram data yet and still rely on the lighter stopword-only check - a
+real, disclosed asymmetry, not a hidden gap.
+
+## Additional PII types (from Diana's pii_categories/components/templates data)
+
+Three new PII rules, modeled directly on the supplied category/template
+spec: Date of Birth (ISO format, context-boosted by "date of birth"/"dob"
+keywords), Street Address (US-style, requires a real street-suffix word -
+verified catching "742 Evergreen Terrace" only after expanding the
+suffix list past the original spec's set, which was missing common ones
+like Terrace/Circle/Way), and Driver's License (US-style state+number).
+Deliberately left as LOW severity without a nearby context keyword (raw
+ISO dates and letter+digit codes are common in non-PII contexts - version
+strings, invoice numbers, timestamps) and boosted to MEDIUM when context
+confirms it, the same pattern already used for phone numbers.
+
+## Saved WiFi profile extraction (Linux)
+
+Reads NetworkManager's connection files directly (plain INI text under
+/etc/NetworkManager/system-connections, pure stdlib parsing, no nmcli
+needed). A saved profile with a plaintext password is flagged MEDIUM -
+that's real signal the original spec called out specifically ("a
+significant security vulnerability" when discovered). These files need
+root to read, which is the OS correctly protecting the credentials, not
+a bug here - running without it just reports "permission denied" rather
+than fabricating a result. This sandbox has no NetworkManager at all, so
+the "not present" path is verified end-to-end; the actual INI-parsing
+logic (SSID/security-type/password extraction) was verified separately
+against a synthetic connection file and correctly extracted all three
+fields. macOS (Keychain) and Windows (WLAN AutoConfig store) are an
+honest "not yet implemented" rather than a guess.
+
+## TPM / Secure Boot (Linux)
+
+- TPM presence: checked via /sys/class/tpm existence - pure file-existence
+  check, no ioctl/exec.
+- Secure Boot: reads the well-known SecureBoot EFI variable directly under
+  /sys/firmware/efi/efivars (the same thing `mokutil --sb-state` reads).
+  Correctly reports "not UEFI" (not "disabled") on legacy-BIOS systems and
+  most VMs/containers, verified against this project's own sandbox (no
+  TPM, no UEFI at all) - the "not present" paths are confirmed working;
+  the positive-detection paths (TPM found, Secure Boot enabled) are
+  straightforward existence/byte checks but have not been run against
+  real hardware with those features active, for lack of a test machine.
+
+## Person-name PII detection (internal/pii/names.go), from real name data
+
+Sourced from an international forename/surname frequency dataset
+(~1,240 forenames, ~1,500 surnames, Latin-script/romanized entries only).
+Detects "First Last" pairs where BOTH words are recognized in their
+respective dictionaries - not either list alone, which would fire
+constantly on ordinary prose (a common first name or surname appears
+in text far too often to be a useful signal by itself). Requiring the
+adjacent pair is a much sharper filter: verified correctly catching real
+names ("Maria Garcia", "John Smith and Sarah Johnson") while correctly
+NOT flagging plausible-looking capitalized phrases like "New York" or
+"Random Capitalized Words." Also correctly surfaced "Robert Aragon" in
+the project's own sample PII test document - a name that was invisible
+to every other check, since it's not a regex-matchable pattern.
+Coverage is necessarily partial (~1,200-1,500 most internationally
+common names, not exhaustive, Latin-script only) - a miss doesn't mean
+"no name is there."
+
 ## What's NOT ported/finished yet
+
 
 - macOS/Windows: local user accounts (Windows only), running processes,
   installed-software inventory, and essentially all of hardware
@@ -181,6 +294,10 @@ natively.
   section)
 - Android/iOS on-device execution (linux-arm64 binary runs under Termux
   as-is; iOS needs a jailbreak or host-side backup analysis)
+- Browser history/bookmarks/saved-credentials forensics - not started;
+  saved-credential decryption specifically needs OS-specific credential
+  APIs (DPAPI/Keychain/gnome-keyring) and deserves real care before
+  being added, not a rushed pass
 
 ## Adding a language
 

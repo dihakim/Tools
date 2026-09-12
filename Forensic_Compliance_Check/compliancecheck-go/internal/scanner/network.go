@@ -15,6 +15,7 @@ import (
 	"runtime"
 	"strings"
 
+	"compliancecheck/internal/hwintel"
 	"compliancecheck/internal/model"
 	"compliancecheck/internal/netinfo"
 )
@@ -31,6 +32,7 @@ func (s *NetworkScanner) Scan() []model.Finding {
 	out = append(out, scanHostsFile()...)
 	out = append(out, scanDNSResolvers()...) // OS-specific, see network_*.go
 	out = append(out, scanListeningPorts()...) // OS-specific, see network_*.go
+	out = append(out, scanWiFiProfiles()...)   // OS-specific, see network_*_wifi.go
 	return out
 }
 
@@ -69,6 +71,9 @@ func scanInterfaces() []model.Finding {
 		f.Location = iface.Name
 		f.Detail = ifaceSummary(iface, up, loopback, addrStrs)
 		f.Evidence["mac"] = iface.HardwareAddr.String()
+		if vendor, ok := hwintel.LookupMACVendor(iface.HardwareAddr.String()); ok {
+			f.Evidence["mac_vendor"] = vendor
+		}
 		f.Evidence["addresses"] = addrStrs
 		f.Evidence["address_classification"] = addrClasses
 		f.Evidence["up"] = up

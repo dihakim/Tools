@@ -23,10 +23,33 @@
       "min_digits": 13,
       "max_digits": 19,
       "context_keywords": {
-        "en": ["card", "visa", "mastercard", "amex", "credit", "debit", "cvv", "expir"],
-        "fr": ["carte", "crédit", "débit", "expiration"],
-        "es": ["tarjeta", "crédito", "débito", "vencimiento"],
-        "de": ["karte", "kredit", "ablauf"]
+        "en": [
+          "card",
+          "visa",
+          "mastercard",
+          "amex",
+          "credit",
+          "debit",
+          "cvv",
+          "expir"
+        ],
+        "fr": [
+          "carte",
+          "cr\u00e9dit",
+          "d\u00e9bit",
+          "expiration"
+        ],
+        "es": [
+          "tarjeta",
+          "cr\u00e9dito",
+          "d\u00e9bito",
+          "vencimiento"
+        ],
+        "de": [
+          "karte",
+          "kredit",
+          "ablauf"
+        ]
       }
     },
     {
@@ -36,7 +59,10 @@
       "severity": "critical",
       "checksum": "ssn_us",
       "context_keywords": {
-        "en": ["ssn", "social security"]
+        "en": [
+          "ssn",
+          "social security"
+        ]
       }
     },
     {
@@ -48,8 +74,14 @@
       "min_digits": 9,
       "max_digits": 9,
       "context_keywords": {
-        "en": ["sin", "social insurance"],
-        "fr": ["nas", "assurance sociale"]
+        "en": [
+          "sin",
+          "social insurance"
+        ],
+        "fr": [
+          "nas",
+          "assurance sociale"
+        ]
       }
     },
     {
@@ -80,10 +112,29 @@
       "severity": "low",
       "checksum": "none",
       "context_keywords": {
-        "en": ["phone", "call", "mobile", "cell", "tel"],
-        "fr": ["téléphone", "tél", "mobile", "portable"],
-        "es": ["teléfono", "tel", "móvil"],
-        "de": ["telefon", "handy", "mobil"]
+        "en": [
+          "phone",
+          "call",
+          "mobile",
+          "cell",
+          "tel"
+        ],
+        "fr": [
+          "t\u00e9l\u00e9phone",
+          "t\u00e9l",
+          "mobile",
+          "portable"
+        ],
+        "es": [
+          "tel\u00e9fono",
+          "tel",
+          "m\u00f3vil"
+        ],
+        "de": [
+          "telefon",
+          "handy",
+          "mobil"
+        ]
       }
     },
     {
@@ -93,10 +144,103 @@
       "severity": "medium",
       "checksum": "none",
       "context_keywords": {
-        "en": ["passport"],
-        "fr": ["passeport"],
-        "es": ["pasaporte"],
-        "de": ["reisepass", "pass"]
+        "en": [
+          "passport"
+        ],
+        "fr": [
+          "passeport"
+        ],
+        "es": [
+          "pasaporte"
+        ],
+        "de": [
+          "reisepass",
+          "pass"
+        ]
+      }
+    },
+    {
+      "id": "RAMQ_QC",
+      "label": "Quebec health insurance number (RAMQ)",
+      "pattern": "\\b[A-Za-z]{4}[ -]?\\d{4}[ -]?\\d{4}\\b",
+      "severity": "critical",
+      "checksum": "none",
+      "context_keywords": {
+        "en": [
+          "ramq",
+          "health card",
+          "health insurance",
+          "medicare"
+        ],
+        "fr": [
+          "ramq",
+          "assurance maladie",
+          "carte soleil"
+        ]
+      }
+    },
+    {
+      "id": "DOB",
+      "label": "Date of birth (ISO format)",
+      "pattern": "\\b(?:19|20)\\d{2}-(?:0[1-9]|1[0-2])-(?:0[1-9]|[12]\\d|3[01])\\b",
+      "severity": "low",
+      "checksum": "none",
+      "context_keywords": {
+        "en": [
+          "dob",
+          "date of birth",
+          "born",
+          "birthdate",
+          "birth date"
+        ],
+        "fr": [
+          "date de naissance",
+          "n\u00e9 le",
+          "n\u00e9e le",
+          "naissance"
+        ]
+      }
+    },
+    {
+      "id": "ADDRESS_US",
+      "label": "Street address",
+      "pattern": "\\b\\d+\\s+[A-Za-z][A-Za-z\\s]{2,30}\\s+(?:Street|St|Avenue|Ave|Road|Rd|Boulevard|Blvd|Drive|Dr|Lane|Ln|Court|Ct|Place|Pl|Terrace|Ter|Circle|Cir|Way|Parkway|Pkwy|Highway|Hwy|Trail|Trl|Square|Sq|Loop|Crescent|Cres)\\b\\.?",
+      "severity": "low",
+      "checksum": "none",
+      "context_keywords": {
+        "en": [
+          "address",
+          "residence",
+          "lives at",
+          "located at"
+        ],
+        "fr": [
+          "adresse",
+          "rue",
+          "domicile",
+          "demeure"
+        ]
+      }
+    },
+    {
+      "id": "DRIVER_LICENSE",
+      "label": "Driver license number (US-style)",
+      "pattern": "\\b[A-Z]{1,2}\\d{6,8}\\b",
+      "severity": "low",
+      "checksum": "none",
+      "context_keywords": {
+        "en": [
+          "driver license",
+          "driver's license",
+          "dl#",
+          "dl number",
+          "license number",
+          "licence"
+        ],
+        "fr": [
+          "permis de conduire",
+          "num\u00e9ro de permis"
+        ]
       }
     }
   ]

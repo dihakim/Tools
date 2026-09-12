@@ -10,6 +10,7 @@ import (
 	"io/fs"
 	"os"
 	"path/filepath"
+	"strconv"
 	"strings"
 	"unicode"
 	"unicode/utf8"
@@ -163,6 +164,15 @@ func (s *StorageScanner) scanFile(path string) []model.Finding {
 		out = append(out, s.scanContent(path, content)...)
 	}
 
+	// Raw-bytes entropy scan - runs on EVERY file regardless of whether it
+	// looked like text/was extractable, because the steganography case this
+	// exists to catch (encrypted/compressed data appended to an otherwise
+	// normal image or media file) is specifically a BINARY file scenario -
+	// the text-content pipeline above never even sees these files.
+	if raw, readable := readTextIfSmallEnough(path); readable {
+		out = append(out, s.scanRawEntropy(path, raw)...)
+	}
+
 	if len(out) == 0 {
 		f := model.NewFinding(model.CategoryStorage, "clean_file", "No issues detected", model.SeverityClean)
 		f.Location = path
@@ -248,12 +258,17 @@ func (s *StorageScanner) scanContent(path string, data []byte) []model.Finding {
 	}
 
 	// Entropy - flag if the file is high-entropy overall, or contains a lot of internal variance.
+	// (Whole-file entropy on the extracted/text content, in addition to the
+	// raw-bytes scan in scanFile that also runs a sliding-window pass for
+	// steganography-style detection across every file, not just text ones.)
 	if entropy.LooksHighEntropy(data) {
+		h := entropy.Shannon(data)
 		f := model.NewFinding(model.CategoryStorage, "high_entropy_content", "High-entropy content (possible encrypted/encoded data)", model.SeverityLow)
 		f.Location = path
 		f.Source = "storage.entropy"
-		f.Detail = "Content entropy is high enough to suggest encrypted, compressed, or encoded data rather than plain text."
-		f.Evidence["shannon_entropy_bits_per_byte"] = entropy.Shannon(data)
+		f.Detail = "Content entropy is high enough to suggest encrypted, compressed, or encoded data rather than plain text (band: " + string(entropy.Classify(h)) + ")."
+		f.Evidence["shannon_entropy_bits_per_byte"] = h
+		f.Evidence["entropy_band"] = entropy.Classify(h)
 		out = append(out, f)
 	}
 
@@ -264,6 +279,42 @@ func (s *StorageScanner) scanContent(path string, data []byte) []model.Finding {
 // contextNote, if non-empty, is appended to each finding's detail so it's
 // clear the match came from decoded/decrypted content rather than the
 // file's literal bytes (e.g. "decoded via vigenere").
+func (s *StorageScanner) scanRawEntropy(path string, data []byte) []model.Finding {
+	// Only worth windowing a file large enough to have a meaningful "before"
+	// and "after" - small files don't have room for a genuine steganography
+	// pattern to show up as a sustained shift.
+	if len(data) < 16*1024 {
+		return nil
+	}
+	windows := entropy.SlidingWindowScan(data, 4096)
+	offset, before, after, ok := entropy.DetectEntropySpike(windows)
+	if !ok {
+		// Deliberately not reporting "this file's raw bytes are high-entropy"
+		// as its own finding here - for compressed formats (PDF/DOCX/ZIP/JPEG/
+		// etc.) that's the normal, expected, non-suspicious state throughout
+		// the whole file. The spike pattern (low entropy THEN a jump) is the
+		// actual signal; uniform entropy either way isn't.
+		return nil
+	}
+
+	f := model.NewFinding(model.CategoryStorage, "entropy_spike", "Entropy spike detected (possible appended/hidden data)", model.SeverityHigh)
+	f.Location = path
+	f.Source = "storage.entropy"
+	f.Detail = "Entropy jumps from " + formatFloat(before) + " to " + formatFloat(after) +
+		" bits/byte at offset " + itoaSimple(offset) + " and stays elevated - consistent with data " +
+		"(encrypted, compressed, or otherwise non-native) appended after the file's legitimate content, " +
+		"a common steganography pattern (e.g. a hidden archive tacked onto a JPEG after its end marker)."
+	f.Evidence["spike_offset_bytes"] = offset
+	f.Evidence["entropy_before"] = before
+	f.Evidence["entropy_after"] = after
+	f.Evidence["window_count"] = len(windows)
+	return []model.Finding{f}
+}
+
+func formatFloat(f float64) string {
+	return strconv.FormatFloat(f, 'f', 2, 64)
+}
+
 func (s *StorageScanner) piiFindings(path, text, contextNote string) []model.Finding {
 	var out []model.Finding
 	for _, m := range s.PIIDetector.Scan(text) {
@@ -290,6 +341,22 @@ func (s *StorageScanner) piiFindings(path, text, contextNote string) []model.Fin
 			f.Evidence["source_context"] = contextNote
 		}
 		out = append(out, f)
+	}
+
+	if len(s.PIIFilter) == 0 || s.PIIFilter["PERSON_NAME"] {
+		for _, m := range pii.DetectNames(text) {
+			f := model.NewFinding(model.CategoryStorage, "pii_person_name", "PII detected: Person name", model.SeverityMedium)
+			f.Location = path
+			f.Source = "storage.pii"
+			f.Detail = "Possible full name found: " + m.Forename + " " + string(m.Surname[0]) + strings.Repeat("*", len(m.Surname)-1)
+			if contextNote != "" {
+				f.Detail += " [" + contextNote + "]"
+				f.Evidence["source_context"] = contextNote
+			}
+			f.Evidence["rule_id"] = "PERSON_NAME"
+			f.Evidence["position"] = m.Position
+			out = append(out, f)
+		}
 	}
 	return out
 }

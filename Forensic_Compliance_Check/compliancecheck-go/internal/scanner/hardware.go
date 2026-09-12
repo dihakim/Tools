@@ -23,6 +23,10 @@ func (s *HardwareScanner) Scan() []model.Finding {
 	out = append(out, scanMemory()...)
 	out = append(out, scanStorage()...)
 	out = append(out, scanUSB()...)
+	out = append(out, scanPCI()...)
+	out = append(out, scanCPUVulnerabilities()...)
+	out = append(out, scanTPM()...)
+	out = append(out, scanSecureBoot()...)
 	out = append(out, scanDiskEncryption()...)
 	return out
 }

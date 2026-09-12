@@ -90,10 +90,14 @@ type RuleInfo struct {
 // picker in a UI. Does not require Load() to have succeeded elsewhere -
 // each call is independent (rules.json is tiny and embedded, so this is cheap).
 func (d *Detector) ListRules() []RuleInfo {
-	out := make([]RuleInfo, 0, len(d.rules))
+	out := make([]RuleInfo, 0, len(d.rules)+1)
 	for _, r := range d.rules {
 		out = append(out, RuleInfo{ID: r.ID, Label: r.Label})
 	}
+	// Name detection isn't a regex rule from rules.json (it's a dictionary
+	// lookup, see names.go) but it goes through the same PIIFilter
+	// mechanism, so it needs to appear in the same picker list.
+	out = append(out, RuleInfo{ID: "PERSON_NAME", Label: "Person name (first + last name pair)"})
 	return out
 }
 // contextWindow controls how many characters around a match are checked for keywords.

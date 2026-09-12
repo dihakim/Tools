@@ -12,7 +12,11 @@
 package cipher
 
 import (
+	"strings"
+	"unicode"
+
 	"compliancecheck/internal/langdetect"
+	"compliancecheck/internal/ngram"
 )
 
 type CrackResult struct {
@@ -33,13 +37,7 @@ func CrackClassical(text string, det *langdetect.Detector) (CrackResult, bool) {
 
 	consider := func(candidate CrackResult) {
 		lr := det.Detect(candidate.Plaintext)
-		// Require meaningfully more confidence than plain language detection
-		// would - this function evaluates ~25+ Caesar shifts plus Vigenère
-		// candidates, and with that many trials even a modest per-trial false
-		// positive rate compounds (confirmed during testing: a 3-letter
-		// spurious Vigenère key validated at 0.14 confidence against a
-		// 0.12 threshold). A single flat cutoff isn't enough on its own.
-		if lr.Language == "" || lr.Confidence < 0.20 {
+		if !validateCrackCandidate(candidate.Plaintext, lr) {
 			return
 		}
 		candidate.Language = lr.Language
@@ -211,6 +209,74 @@ func sortCandidatesByConfidence(c []CaesarCandidate) {
 			c[j], c[j-1] = c[j-1], c[j]
 		}
 	}
+}
+
+// looksLikeRealSentence is a stricter secondary gate specifically for
+// brute-force crack candidates (Caesar/Vigenère/XOR try dozens to hundreds
+// of keys, and langdetect's tokenizer extracts letter-runs from ANYWHERE
+// in the text - including single letters embedded in punctuation noise
+// like "5)$a" -> "a" - which is far too lenient once you're trying that
+// many candidates). Verified during testing: several wrong XOR keys
+// produced punctuation-heavy pseudo-text that scored HIGHER on the plain
+// langdetect confidence than the correct key, because a handful of
+// coincidental single-letter "word" matches inflated the ratio on
+// short/fragmented tokenization.
+//
+// This requires the decoded text to actually consist of clean
+// whitespace-separated words (letters only, plus at most one trailing
+// punctuation mark like a comma or period) - not just contain letters
+// somewhere.
+func looksLikeRealSentence(s string) bool {
+	tokens := strings.Fields(s)
+	if len(tokens) < 4 {
+		return false
+	}
+	clean := 0
+	for _, t := range tokens {
+		t = strings.TrimRight(t, ".,!?;:'\"")
+		if len(t) < 2 {
+			continue
+		}
+		isAlpha := true
+		for _, r := range t {
+			if !unicode.IsLetter(r) {
+				isAlpha = false
+				break
+			}
+		}
+		if isAlpha {
+			clean++
+		}
+	}
+	return float64(clean)/float64(len(tokens)) >= 0.7
+}
+
+// validateCrackCandidate is the single gate every brute-force crack result
+// (Caesar, Vigenère, XOR) must pass before being trusted. Layered checks,
+// each added after a specific false positive was caught during testing:
+//  1. Basic language-detection confidence.
+//  2. looksLikeRealSentence - rejects punctuation-mixed word-salad that
+//     inflates the stopword-fraction score.
+//  3. For English/French specifically, where real corpus bigram data is
+//     available (internal/ngram): require a minimum fraction of actual
+//     recognized word-pairs, not just recognized single words. This is
+//     the hardest check to fool by chance - a wrong key producing two
+//     correct consecutive words in a row is far less likely than one.
+//     Spanish/German don't have bigram data yet, so they skip this extra
+//     layer and rely on checks 1-2 only - a real, disclosed asymmetry.
+func validateCrackCandidate(plaintext string, lr langdetect.Result) bool {
+	if lr.Language == "" || lr.Confidence < 0.20 {
+		return false
+	}
+	if !looksLikeRealSentence(plaintext) {
+		return false
+	}
+	if ngram.HasBigramData(lr.Language) {
+		if ngram.PlausibilityScore(plaintext, lr.Language) < 0.12 {
+			return false
+		}
+	}
+	return true
 }
 
 func itoa(n int) string {

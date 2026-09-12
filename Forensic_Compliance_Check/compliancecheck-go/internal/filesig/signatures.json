@@ -1,20 +1,317 @@
 {
   "signatures": [
-    {"type": "pdf", "extensions": ["pdf"], "magic_hex": ["25504446"]},
-    {"type": "png", "extensions": ["png"], "magic_hex": ["89504e470d0a1a0a"]},
-    {"type": "jpg", "extensions": ["jpg", "jpeg"], "magic_hex": ["ffd8ff"]},
-    {"type": "gif", "extensions": ["gif"], "magic_hex": ["474946383761", "474946383961"]},
-    {"type": "zip_family", "extensions": ["zip", "docx", "xlsx", "pptx", "apk", "jar"], "magic_hex": ["504b0304", "504b0506", "504b0708"]},
-    {"type": "elf", "extensions": ["elf", "so", "bin"], "magic_hex": ["7f454c46"]},
-    {"type": "pe_exe", "extensions": ["exe", "dll", "msi"], "magic_hex": ["4d5a"]},
-    {"type": "macho", "extensions": ["macho", "dylib"], "magic_hex": ["cffaedfe", "feedface", "cafebabe"]},
-    {"type": "gzip", "extensions": ["gz", "gzip"], "magic_hex": ["1f8b"]},
-    {"type": "rar", "extensions": ["rar"], "magic_hex": ["526172211a0700"]},
-    {"type": "sqlite", "extensions": ["db", "sqlite", "sqlite3"], "magic_hex": ["53514c69746520666f726d6174203300"]},
-    {"type": "mp3", "extensions": ["mp3"], "magic_hex": ["494433", "fffb"]},
-    {"type": "mp4", "extensions": ["mp4", "mov", "m4a"], "magic_hex": ["66747970"], "offset": 4},
-    {"type": "bmp", "extensions": ["bmp"], "magic_hex": ["424d"]},
-    {"type": "rtf", "extensions": ["rtf"], "magic_hex": ["7b5c72746631"]},
-    {"type": "ole_doc", "extensions": ["doc", "xls", "ppt", "msi"], "magic_hex": ["d0cf11e0a1b11ae1"]}
+    {
+      "type": "pdf",
+      "extensions": [
+        "pdf"
+      ],
+      "magic_hex": [
+        "25504446"
+      ]
+    },
+    {
+      "type": "png",
+      "extensions": [
+        "png"
+      ],
+      "magic_hex": [
+        "89504e470d0a1a0a"
+      ]
+    },
+    {
+      "type": "jpg",
+      "extensions": [
+        "jpg",
+        "jpeg"
+      ],
+      "magic_hex": [
+        "ffd8ff"
+      ]
+    },
+    {
+      "type": "gif",
+      "extensions": [
+        "gif"
+      ],
+      "magic_hex": [
+        "474946383761",
+        "474946383961"
+      ]
+    },
+    {
+      "type": "zip_family",
+      "extensions": [
+        "zip",
+        "docx",
+        "xlsx",
+        "pptx",
+        "apk",
+        "jar"
+      ],
+      "magic_hex": [
+        "504b0304",
+        "504b0506",
+        "504b0708"
+      ]
+    },
+    {
+      "type": "elf",
+      "extensions": [
+        "elf",
+        "so",
+        "bin"
+      ],
+      "magic_hex": [
+        "7f454c46"
+      ]
+    },
+    {
+      "type": "pe_exe",
+      "extensions": [
+        "exe",
+        "dll",
+        "msi"
+      ],
+      "magic_hex": [
+        "4d5a"
+      ]
+    },
+    {
+      "type": "macho",
+      "extensions": [
+        "macho",
+        "dylib"
+      ],
+      "magic_hex": [
+        "cffaedfe",
+        "feedface",
+        "cafebabe"
+      ]
+    },
+    {
+      "type": "gzip",
+      "extensions": [
+        "gz",
+        "gzip"
+      ],
+      "magic_hex": [
+        "1f8b"
+      ]
+    },
+    {
+      "type": "rar",
+      "extensions": [
+        "rar"
+      ],
+      "magic_hex": [
+        "526172211a0700"
+      ]
+    },
+    {
+      "type": "sqlite",
+      "extensions": [
+        "db",
+        "sqlite",
+        "sqlite3"
+      ],
+      "magic_hex": [
+        "53514c69746520666f726d6174203300"
+      ]
+    },
+    {
+      "type": "mp3",
+      "extensions": [
+        "mp3"
+      ],
+      "magic_hex": [
+        "494433",
+        "fffb"
+      ]
+    },
+    {
+      "type": "mp4",
+      "extensions": [
+        "mp4",
+        "mov",
+        "m4a"
+      ],
+      "magic_hex": [
+        "66747970"
+      ],
+      "offset": 4
+    },
+    {
+      "type": "bmp",
+      "extensions": [
+        "bmp"
+      ],
+      "magic_hex": [
+        "424d"
+      ]
+    },
+    {
+      "type": "rtf",
+      "extensions": [
+        "rtf"
+      ],
+      "magic_hex": [
+        "7b5c72746631"
+      ]
+    },
+    {
+      "type": "ole_doc",
+      "extensions": [
+        "doc",
+        "xls",
+        "ppt",
+        "msi"
+      ],
+      "magic_hex": [
+        "d0cf11e0a1b11ae1"
+      ]
+    },
+    {
+      "type": "7zip",
+      "extensions": [
+        "7z"
+      ],
+      "magic_hex": [
+        "377abcaf271c"
+      ]
+    },
+    {
+      "type": "rar5",
+      "extensions": [
+        "rar"
+      ],
+      "magic_hex": [
+        "526172211a0701"
+      ]
+    },
+    {
+      "type": "tar",
+      "extensions": [
+        "tar"
+      ],
+      "magic_hex": [
+        "7573746172"
+      ],
+      "offset": 257
+    },
+    {
+      "type": "wav",
+      "extensions": [
+        "wav"
+      ],
+      "magic_hex": [
+        "52494646"
+      ],
+      "offset": 0
+    },
+    {
+      "type": "avi",
+      "extensions": [
+        "avi"
+      ],
+      "magic_hex": [
+        "52494646"
+      ],
+      "offset": 0
+    },
+    {
+      "type": "flac",
+      "extensions": [
+        "flac"
+      ],
+      "magic_hex": [
+        "664c6143"
+      ]
+    },
+    {
+      "type": "ico",
+      "extensions": [
+        "ico"
+      ],
+      "magic_hex": [
+        "00000100"
+      ]
+    },
+    {
+      "type": "ttf",
+      "extensions": [
+        "ttf"
+      ],
+      "magic_hex": [
+        "0001000000"
+      ]
+    },
+    {
+      "type": "otf",
+      "extensions": [
+        "otf"
+      ],
+      "magic_hex": [
+        "4f54544f"
+      ]
+    },
+    {
+      "type": "java_class",
+      "extensions": [
+        "class"
+      ],
+      "magic_hex": [
+        "cafebabe"
+      ]
+    },
+    {
+      "type": "webp",
+      "extensions": [
+        "webp"
+      ],
+      "magic_hex": [
+        "57454250"
+      ],
+      "offset": 8
+    },
+    {
+      "type": "pcap",
+      "extensions": [
+        "pcap"
+      ],
+      "magic_hex": [
+        "a1b2c3d4",
+        "d4c3b2a1"
+      ]
+    },
+    {
+      "type": "sqlite_wal",
+      "extensions": [
+        "wal"
+      ],
+      "magic_hex": [
+        "377f0682"
+      ]
+    },
+    {
+      "type": "tiff",
+      "extensions": [
+        "tif",
+        "tiff"
+      ],
+      "magic_hex": [
+        "49492a00",
+        "4d4d002a"
+      ]
+    },
+    {
+      "type": "webm_mkv",
+      "extensions": [
+        "webm",
+        "mkv"
+      ],
+      "magic_hex": [
+        "1a45dfa3"
+      ]
+    }
   ]
 }
