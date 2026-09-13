@@ -15,6 +15,7 @@ import (
 	"log"
 	"net"
 	"net/http"
+	"strings"
 	"time"
 
 	"compliancecheck/internal/cipher"
@@ -45,6 +46,8 @@ type scanRequest struct {
 	Categories []string            `json:"categories"`
 	Checks     map[string][]string `json:"checks"`      // category -> selected check IDs; omitted/empty category = everything
 	PIITypes   []string            `json:"pii_types"`   // PII rule IDs to search for; empty = all
+	CustomNames []pii.NameQuery    `json:"custom_names"` // find these specific people (any format variant)
+	CustomTerms []pii.TermQuery    `json:"custom_terms"` // find these exact strings/regexes
 }
 
 type browseRequest struct {
@@ -238,6 +241,17 @@ func runScan(req scanRequest) (map[string]any, error) {
 				storageScanner.PIIFilter[id] = true
 			}
 		}
+		if len(req.CustomNames) > 0 || len(req.CustomTerms) > 0 {
+			storageScanner.CustomNames = req.CustomNames
+			storageScanner.CustomTerms = req.CustomTerms
+			if errs := storageScanner.PrepareCustomSearches(); len(errs) > 0 {
+				msgs := make([]string, len(errs))
+				for i, e := range errs {
+					msgs[i] = e.Error()
+				}
+				return nil, fmt.Errorf("custom search error(s): %s", strings.Join(msgs, "; "))
+			}
+		}
 		for _, target := range req.Targets {
 			f, err := storageScanner.Scan(target)
 			if err != nil {
@@ -245,6 +259,9 @@ func runScan(req scanRequest) (map[string]any, error) {
 			}
 			findings = append(findings, f...)
 		}
+		// SSH/SUID/credential-file checks scan fixed system locations, not
+		// the user's --target, but conceptually belong with "files" in the UI.
+		findings = append(findings, scanner.NewSystemSecurityScanner().Scan()...)
 	}
 	if wanted["network"] {
 		findings = append(findings, scanner.NewNetworkScanner().Scan()...)

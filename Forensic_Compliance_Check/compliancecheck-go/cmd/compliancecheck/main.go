@@ -51,6 +51,7 @@ func main() {
 	networkScanner := scanner.NewNetworkScanner()
 	softwareScanner := scanner.NewSoftwareScanner()
 	hardwareScanner := scanner.NewHardwareScanner()
+	systemSecurityScanner := scanner.NewSystemSecurityScanner()
 
 	started := time.Now().UTC()
 	findings, err := storageScanner.Scan(*target)
@@ -61,6 +62,7 @@ func main() {
 	findings = append(findings, networkScanner.Scan()...)
 	findings = append(findings, softwareScanner.Scan()...)
 	findings = append(findings, hardwareScanner.Scan()...)
+	findings = append(findings, systemSecurityScanner.Scan()...)
 	finished := time.Now().UTC()
 
 	minRank := 0

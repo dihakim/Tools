@@ -31,6 +31,10 @@ var storageChecks = []CheckDefinition{
 	{ID: "cipher", Label: "Cipher detection/cracking", Prefixes: []string{"cipher_cracked_", "unrecognized_language"}},
 	{ID: "entropy", Label: "High-entropy content", Prefixes: []string{"high_entropy_content", "entropy_spike"}},
 	{ID: "extraction", Label: "Text extraction issues", Prefixes: []string{"extraction_"}},
+	{ID: "ssh", Label: "SSH key security audit", Prefixes: []string{"ssh_"}},
+	{ID: "suid", Label: "SUID/SGID binaries", Prefixes: []string{"suid_"}},
+	{ID: "credential_files", Label: "Credential files (.aws, .netrc, etc.)", Prefixes: []string{"credential_file_"}},
+	{ID: "custom_search", Label: "Custom name/term search", Prefixes: []string{"custom_name_search", "custom_term_search"}},
 }
 
 var networkChecks = []CheckDefinition{
@@ -39,6 +43,7 @@ var networkChecks = []CheckDefinition{
 	{ID: "dns", Label: "DNS resolvers", Prefixes: []string{"dns_"}},
 	{ID: "listening_ports", Label: "Listening ports", Prefixes: []string{"listening_port"}},
 	{ID: "wifi", Label: "Saved WiFi profiles", Prefixes: []string{"wifi_"}},
+	{ID: "firewall", Label: "Firewall rules", Prefixes: []string{"firewall_"}},
 }
 
 var softwareChecks = []CheckDefinition{
@@ -46,6 +51,8 @@ var softwareChecks = []CheckDefinition{
 	{ID: "users", Label: "Local user accounts", Prefixes: []string{"local_user_account", "users_"}},
 	{ID: "processes", Label: "Running processes", Prefixes: []string{"process", "processes_"}},
 	{ID: "packages", Label: "Installed software", Prefixes: []string{"installed_packages", "package_", "packages_"}},
+	{ID: "browsers", Label: "Browser history & bookmarks", Prefixes: []string{"browser_"}},
+	{ID: "persistence", Label: "Persistence/autostart (cron, systemd, etc.)", Prefixes: []string{"persistence_"}},
 }
 
 var hardwareChecks = []CheckDefinition{

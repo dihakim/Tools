@@ -278,6 +278,138 @@ Coverage is necessarily partial (~1,200-1,500 most internationally
 common names, not exhaustive, Latin-script only) - a miss doesn't mean
 "no name is there."
 
+## Language data architecture (internal/langdata)
+
+Answers the "how do I organize words/bigrams/sentences per language,
+where bigrams reference words and sentences reference both" design
+question directly.
+
+**The design: a `Language` struct per language (words, bigrams, sentences
+as three flat slices) - but the three datasets are independent and
+cross-referenced by lookup, not nested into each other.** A `Bigram`
+doesn't contain two `Word` structs; it has a `FirstWord(lang)` method
+that looks its halves up in the same `Language`. A `Sentence` doesn't
+contain its words/bigrams; `sentence.Words(lang)` and
+`sentence.Bigrams(lang)` resolve them on demand.
+
+Why not nest them: the three datasets arrive from different sources at
+different times (today: bigrams only, for en/fr; word lists and sentence
+lists are coming later, per language, separately). If a bigram embedded
+full word objects, every bigram would need updating whenever the word
+list changes. With lookup-based references instead:
+  - Each dataset can be added/updated/regenerated independently.
+  - A language can exist with only bigrams today (the actual current
+    state) and gain words/sentences later with zero code changes - just
+    drop a CSV file in, matching exactly the "bigrams now, words and
+    sentences later" rollout plan.
+  - No duplicated data (a word's popularity/risk lives in exactly one
+    place).
+
+**File layout - this is also the answer to "keep it organized":**
+
+    internal/langdata/data/<code>/words.csv       text,popularity,risk
+    internal/langdata/data/<code>/bigrams.csv     text,popularity
+    internal/langdata/data/<code>/sentences.csv   text,popularity
+
+Adding a new language: create `internal/langdata/data/<code>/` with
+whichever of the three CSVs you have (all three optional - a language
+can exist with just one). Adding a dataset to an existing language: drop
+the missing CSV into its existing directory. Neither requires touching
+any Go source - `internal/langdata/loader.go` auto-discovers every
+subdirectory of `data/` at build time via `go:embed`, and each language
+only registers if it has at least one non-empty dataset.
+
+**Ergonomics** (the "Word("Doll", popularity: 2901, risk: 0.1)" ask):
+
+    lang, _ := langdata.Get("en")
+    w, ok := lang.Word("doll")               // Word{Text, Popularity, Risk}
+    b, ok := lang.Bigram("of the")           // Bigram{Text, First, Second, Popularity}
+    fw, ok := b.FirstWord(lang)              // resolves "of" back to its Word
+    s, ok := lang.Sentence("the cat sat")
+    words := s.Words(lang)                   // []Word, resolved on demand
+    score := lang.BigramPlausibility(text)   // used by cipher-crack validation
+
+**Migration note:** the bigram data added earlier this session (English
+~5,000 entries, French ~10,000) has been moved into this structure with
+real popularity numbers preserved from the original frequency exports
+(e.g. "of the" carries its real corpus count, not a placeholder).
+`internal/ngram` (the package cipher-crack validation calls) is now a
+thin compatibility wrapper delegating to `internal/langdata`, so nothing
+in `internal/cipher` needed to change - verified via full regression
+before/after (English and French Vigenère cracks both still recover the
+exact correct key, and the whole-system scan produces byte-identical
+finding counts).
+
+`internal/langdetect`'s stopword-list-based language detection is a
+separate, older system and hasn't been folded into this yet - a natural
+next step once real word-frequency lists arrive per language, but not
+forced prematurely while only bigram data exists.
+
+
+
+## Custom search: specific people and exact strings/regex
+
+Two new user-directed search types, on top of the general PII engine:
+
+- **Name search**: give any combination of first/middle/last name and it
+  generates realistic real-world format variants automatically - "Mike
+  Brown", "Mike H. Brown", "Brown, Mike Hawk", "M. Brown", etc. - rather
+  than only matching the exact spelling typed in. Each variant carries a
+  confidence tier (full first+last = high, bare initials = low) so
+  abbreviated/ambiguous forms are still surfaced but clearly labeled as
+  less certain. Verified: correctly found "Mike Brown", "Mike H. Brown",
+  and "Brown, Mike Hawk" in test text while correctly NOT matching an
+  unrelated "Mike Bishop" or "Sarah Brown" also present in the same text.
+  Overlapping matches at the same position (a short variant matching
+  inside a longer one) are deduplicated to keep only the more specific hit.
+- **Exact string/regex search**: arbitrary user-supplied text or regex
+  pattern, case-sensitive or not. Non-regex input is escaped so it's
+  never accidentally interpreted as regex syntax.
+
+Available via `--serve`'s "Custom search" panel on the Scan tab, or the
+API's `custom_names`/`custom_terms` fields.
+
+## New: persistence, SSH audit, SUID scan, credential-file scan, firewall
+
+Five more checks, all verified against real data in this project's own
+sandbox:
+
+- **Persistence/autostart scanning** (Linux) - cron (`/etc/crontab`,
+  `/etc/cron.d/*`, the periodic script dirs), systemd enabled units (read
+  directly from `/etc/systemd/system/*.wants/` symlinks - NOT via
+  `systemctl`, which needs a running bus connection that isn't always
+  available; confirmed in this sandbox, where `systemctl list-timers`
+  failed with "Failed to connect to bus" while the same data was still
+  readable straight from disk), XDG autostart `.desktop` entries, and
+  `/etc/rc.local`. Verified against this sandbox's real cron.d entry and
+  every one of its real enabled systemd units.
+- **SSH key security audit** (Linux/macOS) - flags an overly-permissive
+  `~/.ssh` directory, a group/other-readable private key, or a
+  group/other-writable `authorized_keys`/config (each defeats SSH's trust
+  model). Never reads or reports actual key material. Verified against a
+  synthetic profile with a deliberately misconfigured 644 private key and
+  755 `.ssh` dir - both correctly flagged (HIGH and MEDIUM respectively).
+- **SUID/SGID binary scan** (Linux/macOS) - the classic Unix
+  privilege-escalation hardening check. A small known-common set
+  (passwd, sudo, ping, mount, etc.) reports at INFO; anything else at LOW
+  for a closer look. Verified against this sandbox's real `/usr/bin/passwd`
+  (genuinely SUID) and every other real SUID/SGID binary on the system.
+- **Credential-file scanning** - checks well-known PLAINTEXT-BY-DESIGN
+  credential locations (`.aws/credentials`, `.netrc`, `.git-credentials`,
+  `.npmrc`, `.pypirc`, Docker/kube configs). These are a fundamentally
+  different category from browser-saved-password decryption (see below):
+  nothing here is OS-encrypted, they're just config files a tool reads as
+  plain text, same sensitivity as any other file this tool reads.
+  Verified against synthetic AWS credentials and a `.netrc` - both
+  correctly flagged HIGH with the actual secret material never quoted in
+  the finding, only its presence.
+- **Firewall rules** (Linux) - `nft list ruleset` or `iptables-save`
+  fallback, both already-installed system tools invoked read-only.
+  Neither is installed in this project's sandbox, so only the graceful
+  "tool not found" path is verified end-to-end; the parsing logic itself
+  is a straightforward line count/passthrough, not complex enough to need
+  separate verification.
+
 ## What's NOT ported/finished yet
 
 
@@ -294,10 +426,71 @@ common names, not exhaustive, Latin-script only) - a miss doesn't mean
   section)
 - Android/iOS on-device execution (linux-arm64 binary runs under Termux
   as-is; iOS needs a jailbreak or host-side backup analysis)
-- Browser history/bookmarks/saved-credentials forensics - not started;
-  saved-credential decryption specifically needs OS-specific credential
-  APIs (DPAPI/Keychain/gnome-keyring) and deserves real care before
-  being added, not a rushed pass
+- Saved/decrypted browser passwords - deliberately excluded, see below
+
+## Browser history & bookmarks forensics (NOT saved passwords)
+
+Reads Firefox's places.sqlite and Chrome/Edge's History file directly, via
+a purpose-built pure-Go SQLite reader (`internal/sqlitemin` - see below).
+Emits one summary Finding per browser profile (entry/domain counts, top
+domains, a capped sample) rather than one Finding per URL, which would
+flood the report; every visited domain is also cross-checked against the
+small bundled website-reputation reference data (`internal/hwintel`) -
+verified catching a synthetic visit to a domain flagged "critical" risk
+in that data, correctly raised to HIGH severity.
+
+**Deliberately excluded: saved/decrypted browser passwords.** Reading
+history and bookmarks is the same sensitivity as everything else this
+tool reads (local files, no protection to bypass). Decrypting saved
+login credentials is a different kind of capability - Chrome's "Login
+Data" and Firefox's key4.db/logins.json are specifically OS/browser-
+encrypted to keep other processes from reading them, and a generic
+"decrypt every saved password in one pass" function is also the
+signature core feature of commodity credential-stealing malware
+(RedLine, Vidar, LummaC2, and similar infostealers all implement exactly
+this). That's true of the artifact regardless of the intent behind
+building it, so it isn't included here.
+
+### internal/sqlitemin - a minimal pure-Go SQLite reader, built from scratch
+
+A real pure-Go SQLite driver (github.com/glebarez/go-sqlite) was
+attempted first, to avoid reinventing this - but its transitive
+dependencies (golang.org/x/sys, modernc.org/libc, modernc.org/sqlite)
+turned out to be unreachable from this project's sandboxed build
+environment (only github.com is allowlisted; golang.org and modernc.org
+are not), so a CGO-free dependency wasn't obtainable here. Rather than
+fall back to a CGO-based driver (which would break this project's
+"cross-compile from one Linux box to 5 platforms with zero extra
+tooling" architecture - the entire reason this got rewritten out of
+Python), this is a from-scratch reader implementing just enough of the
+public SQLite file format to read a named table's rows: file header
+parsing, table B-tree traversal (both interior and leaf pages), SQLite's
+varint and record/serial-type encoding, and overflow-page following for
+values too large to fit in one page. Column names/order are read
+dynamically from each table's own CREATE TABLE statement (via
+sqlite_master) rather than hardcoded, since real Firefox/Chrome schemas
+vary across versions.
+
+This was verified rigorously against REAL SQLite files (written by
+Python's standard sqlite3 module, which uses the actual reference
+SQLite C library - not a synthetic mock of the format):
+  - A small table with a deliberately oversized field (a 5,020-character
+    URL) - correctly read back byte-for-byte, confirming overflow-page
+    handling works.
+  - A 3,000-row table spanning ~68 pages - every row read back with the
+    correct primary-key value (`id`), zero duplicates, zero missing rows,
+    in strictly ascending key order, confirming interior-page B-tree
+    traversal works correctly across many pages.
+  - Along the way, caught and fixed a real SQLite format subtlety: an
+    `INTEGER PRIMARY KEY` column is stored as a rowid alias and is NEVER
+    present in the record body (it decodes as NULL) - the first version
+    of this reader returned `nil` for every `id` column until this was
+    special-cased, which would have silently broken the bookmark-to-URL
+    join (Firefox's moz_bookmarks.fk references moz_places.id).
+  - A realistic Firefox profile (moz_places + moz_bookmarks, with a
+    bookmark referencing a place by fk) was read end-to-end through the
+    actual browser scanner - both the history summary and the bookmark
+    title-to-URL join produced correct results.
 
 ## Adding a language
 

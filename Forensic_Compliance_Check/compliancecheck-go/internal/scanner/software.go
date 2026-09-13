@@ -25,6 +25,8 @@ func (s *SoftwareScanner) Scan() []model.Finding {
 	out = append(out, scanUsers()...)   // OS-specific, see software_*.go
 	out = append(out, scanProcesses()...) // OS-specific, see software_*.go
 	out = append(out, scanSoftwarePackages()...) // OS-specific, see software_*_packages.go
+	out = append(out, scanBrowsers()...) // history/bookmarks only, cross-platform paths - see software_browser.go
+	out = append(out, scanPersistence()...) // OS-specific, see software_*_persistence.go
 	return out
 }
 

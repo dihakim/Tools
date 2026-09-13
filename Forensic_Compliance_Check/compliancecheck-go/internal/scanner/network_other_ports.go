@@ -26,3 +26,10 @@ func scanWiFiProfiles() []model.Finding {
 	f.Detail = "Linux reads NetworkManager's connection files directly. macOS keeps WiFi passwords in the Keychain (needs `security find-generic-password` or Keychain Services API - not yet built). Windows keeps them in the WLAN AutoConfig store (needs `netsh wlan show profile key=clear`, which requires admin and is per-profile - not yet built)."
 	return []model.Finding{f}
 }
+
+func scanFirewallRules() []model.Finding {
+	f := model.NewFinding(model.CategoryNetwork, "firewall_not_implemented", "Firewall rule enumeration not yet implemented on this OS", model.SeverityInfo)
+	f.Source = "network.firewall"
+	f.Detail = "Linux uses nft/iptables-save directly. macOS needs `pfctl -sr` (packet filter). Windows needs `netsh advfirewall firewall show rule` or the COM firewall API. Neither implemented yet."
+	return []model.Finding{f}
+}

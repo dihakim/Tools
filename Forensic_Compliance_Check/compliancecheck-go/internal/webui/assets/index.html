@@ -147,6 +147,35 @@
     <p class="hint" style="margin-top:14px;">Pick exactly what to search for and include in the report - everything is on by default. Every check still runs; this only controls what's shown/saved.</p>
     <div id="checksContainer"></div>
 
+    <details class="cat-block">
+      <summary>Custom search - find a specific person or exact text</summary>
+      <p class="hint" style="margin-top:8px;">Enter any combination of name parts - searches for realistic real-world formats (Mike Brown, Mike H. Brown, Brown, Mike, etc.), not just the exact spelling typed here.</p>
+      <div class="inline-row">
+        <div class="field"><label>First name</label><input type="text" id="nameFirst" placeholder="Mike"></div>
+        <div class="field"><label>Middle name</label><input type="text" id="nameMiddle" placeholder="Hawk"></div>
+        <div class="field"><label>Last name</label><input type="text" id="nameLast" placeholder="Brown"></div>
+        <button type="button" class="secondary" onclick="addNameQuery()">Add name</button>
+      </div>
+      <div id="nameQueryList"></div>
+
+      <p class="hint" style="margin-top:14px;">Or search for an exact string or regular expression:</p>
+      <div class="inline-row">
+        <div class="field" style="flex:1;"><label>Text or regex</label><input type="text" id="termText" placeholder="OperationPhoenix" style="min-width:220px;"></div>
+        <div class="field">
+          <label style="display:flex; align-items:center; gap:5px; color:var(--text);">
+            <input type="checkbox" id="termIsRegex"> Treat as regex
+          </label>
+        </div>
+        <div class="field">
+          <label style="display:flex; align-items:center; gap:5px; color:var(--text);">
+            <input type="checkbox" id="termCaseSensitive"> Case-sensitive
+          </label>
+        </div>
+        <button type="button" class="secondary" onclick="addTermQuery()">Add term</button>
+      </div>
+      <div id="termQueryList"></div>
+    </details>
+
     <div class="status" id="status"></div>
   </div>
 
@@ -284,9 +313,51 @@ function escapeHtml(s) {
 // ============================= SCAN TAB =============================
 let lastReport = null;
 let selectedTargets = [];
+let nameQueries = [];
+let termQueries = [];
 let checkDefs = {};   // category -> [{id,label}]
 let piiTypes = [];    // [{id,label}]
 const sevRank = {clean:0, info:0, low:1, medium:2, high:3, critical:4};
+
+function addNameQuery() {
+  const first = document.getElementById('nameFirst').value.trim();
+  const middle = document.getElementById('nameMiddle').value.trim();
+  const last = document.getElementById('nameLast').value.trim();
+  if (!first && !last) { document.getElementById('status').textContent = 'Enter at least a first or last name.'; return; }
+  nameQueries.push({first, middle, last});
+  document.getElementById('nameFirst').value = '';
+  document.getElementById('nameMiddle').value = '';
+  document.getElementById('nameLast').value = '';
+  renderQueryLists();
+}
+
+function addTermQuery() {
+  const text = document.getElementById('termText').value.trim();
+  if (!text) return;
+  termQueries.push({
+    text,
+    is_regex: document.getElementById('termIsRegex').checked,
+    case_sensitive: document.getElementById('termCaseSensitive').checked
+  });
+  document.getElementById('termText').value = '';
+  renderQueryLists();
+}
+
+function removeNameQuery(i) { nameQueries.splice(i, 1); renderQueryLists(); }
+function removeTermQuery(i) { termQueries.splice(i, 1); renderQueryLists(); }
+
+function renderQueryLists() {
+  const nameList = document.getElementById('nameQueryList');
+  nameList.innerHTML = nameQueries.map((q, i) =>
+    `<div class="candidate-row"><span>${escapeHtml([q.first, q.middle, q.last].filter(Boolean).join(' '))}</span>` +
+    `<span><a href="#" onclick="removeNameQuery(${i}); return false;" style="color:var(--critical);">remove</a></span></div>`
+  ).join('');
+  const termList = document.getElementById('termQueryList');
+  termList.innerHTML = termQueries.map((q, i) =>
+    `<div class="candidate-row"><span>${escapeHtml(q.text)}${q.is_regex ? ' (regex)' : ''}</span>` +
+    `<span><a href="#" onclick="removeTermQuery(${i}); return false;" style="color:var(--critical);">remove</a></span></div>`
+  ).join('');
+}
 
 async function loadScanConfig() {
   try {
@@ -441,7 +512,9 @@ async function runScan() {
       body: JSON.stringify({
         targets, categories,
         checks: collectChecks(),
-        pii_types: collectPIITypes()
+        pii_types: collectPIITypes(),
+        custom_names: nameQueries,
+        custom_terms: termQueries
       })
     });
     if (!resp.ok) {

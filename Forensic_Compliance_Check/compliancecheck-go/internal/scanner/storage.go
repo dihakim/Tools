@@ -8,8 +8,10 @@ package scanner
 
 import (
 	"io/fs"
+	"fmt"
 	"os"
 	"path/filepath"
+	"regexp"
 	"strconv"
 	"strings"
 	"unicode"
@@ -41,6 +43,45 @@ type StorageScanner struct {
 	// check selection) because it needs to affect what the PII detector
 	// actually matches, not just what's displayed afterward.
 	PIIFilter map[string]bool
+
+	// CustomNames/CustomTerms are user-directed searches: "find this
+	// specific person" (any combination of first/middle/last, matched
+	// against realistic name-format variants) or "find this exact
+	// string/regex" - see internal/pii/customsearch.go. Both are compiled
+	// once via PrepareCustomSearches before a scan, not per-file.
+	CustomNames []pii.NameQuery
+	CustomTerms []pii.TermQuery
+
+	compiledNameVariants map[int][]pii.NameVariant // index into CustomNames -> its variants
+	compiledTerms        map[int]*regexp.Regexp    // index into CustomTerms -> its compiled pattern
+}
+
+// PrepareCustomSearches compiles CustomNames/CustomTerms once before
+// scanning - called by the scanner's constructor path (webui/CLI), not
+// per-file, since regex compilation is the expensive part. Returns any
+// compile errors (e.g. invalid user-supplied regex) so the caller can
+// report them clearly instead of silently dropping that search term.
+func (s *StorageScanner) PrepareCustomSearches() []error {
+	var errs []error
+	s.compiledNameVariants = map[int][]pii.NameVariant{}
+	for i, q := range s.CustomNames {
+		variants, err := pii.GenerateNameVariants(q)
+		if err != nil {
+			errs = append(errs, fmt.Errorf("name search %d (%s %s %s): %w", i, q.First, q.Middle, q.Last, err))
+			continue
+		}
+		s.compiledNameVariants[i] = variants
+	}
+	s.compiledTerms = map[int]*regexp.Regexp{}
+	for i, q := range s.CustomTerms {
+		re, err := q.Compile()
+		if err != nil {
+			errs = append(errs, fmt.Errorf("term search %d (%q): %w", i, q.Text, err))
+			continue
+		}
+		s.compiledTerms[i] = re
+	}
+	return errs
 }
 
 func NewStorageScanner() (*StorageScanner, error) {
@@ -191,6 +232,10 @@ func (s *StorageScanner) scanContent(path string, data []byte) []model.Finding {
 	// PII (in the raw content).
 	out = append(out, s.piiFindings(path, text, "")...)
 
+	// User-directed custom searches: specific named people and/or
+	// arbitrary strings/regex - see internal/pii/customsearch.go.
+	out = append(out, s.customSearchFindings(path, text)...)
+
 	// Encoded substrings (base64/hex/base32/binary/URL-encoding) anywhere in
 	// the text - these can appear inside otherwise perfectly normal files
 	// (e.g. "here's the API token: <base64>..." in a README or config).
@@ -313,6 +358,47 @@ func (s *StorageScanner) scanRawEntropy(path string, data []byte) []model.Findin
 
 func formatFloat(f float64) string {
 	return strconv.FormatFloat(f, 'f', 2, 64)
+}
+
+// customSearchFindings runs any prepared user-directed name/term searches
+// against text. Uses the pre-compiled variants/patterns from
+// PrepareCustomSearches - if that was never called (no custom searches
+// requested), these maps are nil and this is a no-op.
+func (s *StorageScanner) customSearchFindings(path, text string) []model.Finding {
+	var out []model.Finding
+
+	for i, variants := range s.compiledNameVariants {
+		q := s.CustomNames[i]
+		nameLabel := strings.TrimSpace(strings.Join([]string{q.First, q.Middle, q.Last}, " "))
+		for _, m := range pii.SearchNameVariants(text, variants) {
+			sevMap := map[string]model.Severity{"high": model.SeverityHigh, "medium": model.SeverityMedium, "low": model.SeverityLow}
+			f := model.NewFinding(model.CategoryStorage, "custom_name_search", "Custom name search match: "+nameLabel, sevMap[m.Confidence])
+			f.Location = path
+			f.Source = "storage.custom_search"
+			f.Detail = "Matched \"" + m.MatchedText + "\" (format: " + m.VariantLabel + ", confidence: " + m.Confidence + ")"
+			f.Evidence["query"] = nameLabel
+			f.Evidence["variant"] = m.VariantLabel
+			f.Evidence["confidence"] = m.Confidence
+			f.Evidence["position"] = m.Position
+			out = append(out, f)
+		}
+	}
+
+	for i, re := range s.compiledTerms {
+		q := s.CustomTerms[i]
+		for _, m := range pii.SearchTerm(text, re) {
+			f := model.NewFinding(model.CategoryStorage, "custom_term_search", "Custom search match", model.SeverityMedium)
+			f.Location = path
+			f.Source = "storage.custom_search"
+			f.Detail = "Matched \"" + m.MatchedText + "\" for query \"" + q.Text + "\""
+			f.Evidence["query"] = q.Text
+			f.Evidence["is_regex"] = q.IsRegex
+			f.Evidence["position"] = m.Position
+			out = append(out, f)
+		}
+	}
+
+	return out
 }
 
 func (s *StorageScanner) piiFindings(path, text, contextNote string) []model.Finding {

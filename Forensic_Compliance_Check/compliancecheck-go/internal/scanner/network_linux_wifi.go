@@ -140,10 +140,3 @@ func parseNMConnection(path string) (nmProfile, error) {
 	}
 	return profile, scanner.Err()
 }
-
-func orDefault(s, def string) string {
-	if s == "" {
-		return def
-	}
-	return s
-}

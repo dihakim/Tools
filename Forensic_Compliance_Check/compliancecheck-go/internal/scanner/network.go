@@ -33,6 +33,7 @@ func (s *NetworkScanner) Scan() []model.Finding {
 	out = append(out, scanDNSResolvers()...) // OS-specific, see network_*.go
 	out = append(out, scanListeningPorts()...) // OS-specific, see network_*.go
 	out = append(out, scanWiFiProfiles()...)   // OS-specific, see network_*_wifi.go
+	out = append(out, scanFirewallRules()...)  // OS-specific, see network_*_firewall.go
 	return out
 }
 
@@ -174,6 +175,16 @@ func scanHostsFile() []model.Finding {
 		out = append(out, clean)
 	}
 	return out
+}
+
+// orDefault returns s, or def if s is empty. Shared across storage/network
+// scanners (kept in this no-build-tag file since it's needed on both
+// Linux-only and Linux+macOS files).
+func orDefault(s, def string) string {
+	if s == "" {
+		return def
+	}
+	return s
 }
 
 func looksLikeRealDomain(d string) bool {

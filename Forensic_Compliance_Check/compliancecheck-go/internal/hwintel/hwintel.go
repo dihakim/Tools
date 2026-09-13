@@ -209,16 +209,21 @@ var (
 func init() {
 	if b, err := embedded.ReadFile("software_intel.json"); err == nil {
 		var doc struct {
-			Blacklist []BlacklistEntry `json:"blacklist"`
-			Whitelist []WhitelistEntry `json:"whitelist"`
-			CVEs      []SoftwareCVE    `json:"cves"`
-			Software  []SoftwareRef    `json:"software"`
+			Blacklist []BlacklistEntry    `json:"blacklist"`
+			Whitelist []WhitelistEntry    `json:"whitelist"`
+			CVEs      []SoftwareCVE       `json:"cves"`
+			Software  []SoftwareRef       `json:"software"`
+			Websites  []WebsiteReputation `json:"websites"`
 		}
 		if json.Unmarshal(b, &doc) == nil {
 			blacklist = doc.Blacklist
 			whitelist = doc.Whitelist
 			softwareCVEs = doc.CVEs
 			softwareRefs = doc.Software
+			websiteByDomain = map[string]WebsiteReputation{}
+			for _, w := range doc.Websites {
+				websiteByDomain[strings.ToLower(w.Domain)] = w
+			}
 		}
 	}
 }
@@ -262,4 +267,23 @@ func MatchSoftwareCVEs(name string) []SoftwareCVE {
 		}
 	}
 	return out
+}
+
+type WebsiteReputation struct {
+	Domain          string  `json:"domain"`
+	Category        string  `json:"category"`
+	SecurityRating  int     `json:"security_rating"`
+	RiskLevel       string  `json:"risk_level"`
+	IsMalicious     int     `json:"is_malicious"`
+	ReputationScore float64 `json:"reputation_score"`
+}
+
+var websiteByDomain map[string]WebsiteReputation
+
+// LookupWebsiteReputation returns bundled reputation data for an exact
+// domain match. Small sample dataset (~13 domains) - a hit is meaningful
+// signal, a miss means nothing either way (not in this snapshot).
+func LookupWebsiteReputation(domain string) (WebsiteReputation, bool) {
+	w, ok := websiteByDomain[strings.ToLower(strings.TrimPrefix(domain, "www."))]
+	return w, ok
 }
