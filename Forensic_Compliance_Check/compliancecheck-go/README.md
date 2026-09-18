@@ -345,7 +345,161 @@ separate, older system and hasn't been folded into this yet - a natural
 next step once real word-frequency lists arrive per language, but not
 forced prematurely while only bigram data exists.
 
+**Update - words and sentences have since arrived** (real data, not
+placeholders): English now has 4,350 words (real corpus frequency, e.g.
+"the" = 22,038,615) and 10,000 sentences; French now has 9,999 words and
+242 sentences. Both languages now have all three datasets. One real bug
+caught and fixed while wiring this in: case-insensitive lookup was
+silently letting whichever case-variant of a word/sentence happened to
+appear LATER in the source file win, discarding an earlier and far more
+popular one (a lowercase "oh." at frequency 5,162 was overwriting the
+real "Oh." at frequency 1,146,885, purely because of file order) - fixed
+so a collision now keeps whichever variant has the higher popularity,
+verified against that exact case.
 
+Deferred/not wired in yet: 3/4/5-gram frequency data (English and
+French, supplied) - the current schema only models words/bigrams/
+sentences, so trigram+ data would need a schema extension (straightforward
+- same pattern, one more flat collection - but not done since nothing
+currently consumes it; bigram-level validation is already a large
+accuracy improvement over the plain stopword check it replaced). A
+messier print-layout French word-frequency file was also skipped since a
+cleaner source for the same data was already used.
+
+## Rough dictionary translation ("decode" a language like a cipher)
+
+Real bilingual dictionary data wired in: CC-CEDICT for Chinese (115,570
+entries, filtered to words ≤4 characters - longer CEDICT entries are
+almost always idioms/proper nouns rather than everyday vocabulary), a
+Wiktionary extract for Spanish (97,993 single-word entries), and the
+official Jōyō kanji list for Japanese (2,136 characters - single-kanji
+meanings only, no compound-word dictionary was supplied for Japanese).
+
+`internal/translate` ties this together: tokenize (Chinese uses the
+`SegmentCJK` dictionary-segmentation built earlier; Japanese falls back
+to per-character since there's no compound-word dictionary for it;
+everything else splits on whitespace), look each token up, and produce
+a word-by-word breakdown plus a crude literal "rough translation" (first
+short definition of each token, in original word order). This is framed
+deliberately as decoding, not translating - same conceptual family as
+the classical-cipher tools elsewhere in this project: given a known
+"key" (dictionary data instead of a Vigenère key), decode token-by-token
+and show your work, with zero claim to fluent output.
+
+Verified against the exact example given: "我们的朋友是你的朋友"
+("our friend is your friend") glossed at 100% dictionary coverage, with
+我们 → "we; us; ourselves; our" and 朋友 → "friend" matching almost
+verbatim. Also verified for Spanish ("gracias amigo" → "thank you
+friend").
+
+Available via the Cipher Tools tab's new "Translate" panel, or the
+`/api/translate` and `/api/translate/languages` endpoints.
+
+## Scan tab reorganized: one dropdown per category, checkbox in the header
+
+Restructured per request: the four categories (Storage/Files, Network,
+Software, Hardware) are now each a single collapsible dropdown with its
+enable/disable checkbox built into the header row, instead of a separate
+checkbox strip above a separate accordion list. Storage/Files' dropdown
+now contains, in order: a "General" section (hidden files, file
+signature mismatch, cipher detection, encoded content, entropy,
+extraction issues, SSH/SUID/credential-file checks), a "PII detections"
+section (the PII type picker), and the "Custom search" panel (specific-
+person and exact-text/regex search) nested inside it, per request,
+rather than sitting as a separate block below everything else.
+
+Also added a real gap the reorganization surfaced: hidden-file/folder
+detection didn't exist before (Unix dot-prefix convention, or the
+Windows hidden-file attribute via a proper syscall check) - now a
+"General" check under Storage/Files. LOW severity, visibility-only
+(dotfiles are common and mostly benign) - verified against a real
+`.secret_config` test file (correctly flagged) alongside a normal file
+(correctly left clean).
+
+The whole restructured UI was verified for real, not just by reading the
+code: extracted the page's JavaScript and ran it in Node with jsdom (a
+real DOM implementation, not a browser, but real DOM APIs and real
+execution) against mocked API responses, confirming all four category
+dropdowns render, the checkbox lives inside each summary row, the PII
+grid and Custom Search panel are nested inside Storage/Files specifically
+(and correctly absent from the other three), unchecking a sub-item
+correctly changes what `collectChecks()` sends, and adding a name/term
+query correctly renders in the list. One real bug caught during this
+process turned out to be a test-harness timing issue, not an actual page
+bug (a mocked `fetch` assigned after the page's own script had already
+run) - worth naming so it isn't mistaken for a fixed product bug.
+
+## Spanish + Chinese added (5 languages now: en/fr/es/de*/zh)
+
+Spanish: 10,000 words with real frequency data, same architecture as
+English/French (space-delimited, no changes needed). German still only
+has the original stopword-based langdetect support, not full langdata
+words/bigrams/sentences yet - marked with `*` above pending that data.
+
+**Chinese is a genuinely different case, worth being precise about.**
+Chinese text has no spaces between words - every other part of this
+codebase (langdetect's scoring, bigram plausibility, cipher-crack
+validation) assumes whitespace-delimited tokenization, which is simply
+wrong for Chinese and would silently fail on it (a whole sentence would
+tokenize as one giant "word" that matches nothing).
+
+What's actually done: 10,000 Chinese words loaded with real frequency
+data, plus a new `Language.SegmentCJK()` - dictionary-based forward
+maximum-matching segmentation (the standard lightweight technique for
+CJK tokenization without a full NLP library/model: at each position,
+greedily take the longest known dictionary word starting there, fall
+back to one character if nothing matches). This is genuinely tested, not
+just plausible-looking: segmenting "我们的朋友是你的朋友" ("our friend
+is your friend") correctly produced `[我们 的 朋友 是 你 的 朋友]` -
+exactly the real word boundaries a Chinese speaker would draw, correctly
+keeping "我们" (we) and "朋友" (friend) as single 2-character words
+rather than splitting them into individual characters.
+
+What's NOT done: `SegmentCJK` isn't wired into langdetect or the
+cipher-crack validation pipeline yet - those packages still assume
+Latin-script space-tokenization throughout, and connecting Chinese
+detection all the way through would mean touching both of them
+non-trivially (langdetect's whole scoring model, cipher/crack.go's
+`looksLikeRealSentence` word-cleanliness check, the bigram
+plausibility scorer). Simple dictionary maximum-matching also has real,
+known limitations even for its intended job - no ambiguity resolution,
+no recognition of genuinely novel multi-character words outside the
+10,000-word dictionary. The data and the segmenter are real and tested;
+full language-detection integration for Chinese is a deliberately
+separate, not-yet-done next step, not something quietly assumed to work.
+
+
+
+## File signature database rebuilt from structured reference data
+
+Replaced the earlier hand-maintained ~31-entry signature list with a
+structured 84-entry export, with two real upgrades:
+
+- **Multi-checkpoint matching.** A signature can now require several
+  (offset, bytes) pairs to ALL match, not just one - this is what makes
+  it possible to tell WAV/AVI/WEBP apart even though they all share the
+  same 4-byte "RIFF" prefix at offset 0 (the real disambiguator is a
+  second 4-byte tag 8 bytes in). Verified against synthetic files built
+  to the real format spec: a "RIFF...AVI " file saved as `.wav` was
+  correctly identified as "avi", not just a generic RIFF match - the old
+  single-checkpoint scheme couldn't have made that distinction. Also
+  verified a genuine `.wav` and a genuine `.mp4` both correctly pass as
+  clean. Offsets were independently checked against known real format
+  specs during import (TAR's "ustar" at byte 257, ISO 9660's "CD001" at
+  byte 32769, MP4's "ftyp" at byte 4 - all textbook-correct) after
+  catching and fixing two of my own bugs in the offset-parsing math.
+- **Reliable vs. heuristic signatures.** Only genuine format-guaranteed
+  binary magic numbers (PE headers, ZIP/OOXML, images, audio/video,
+  archives, SQLite, etc.) can trigger a "signature mismatch" verdict.
+  Text-based formats whose first bytes aren't actually guaranteed by
+  spec (a shebang line, a JSON brace, an XML declaration, a comment
+  character) are marked heuristic-only: they can still positively
+  confirm a match, but never cause a mismatch flag on their own, since
+  plenty of legitimate files of those types don't start that way (a
+  sourced shell script often has no shebang; JSON/XML commonly have
+  leading whitespace or a BOM). Getting this wrong would have turned
+  ordinary text files into false "signature mismatch" reports - the
+  opposite of what this check is for.
 
 ## Custom search: specific people and exact strings/regex
 

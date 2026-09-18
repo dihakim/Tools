@@ -1,0 +1,1799 @@
+{
+  "host": {
+    "os": "windows",
+    "arch": "amd64"
+  },
+  "started_at": "2026-09-15T17:49:37.5633351Z",
+  "finished_at": "2026-09-15T17:49:37.6496353Z",
+  "summary": {
+    "total_findings": 40,
+    "flagged_findings": 1,
+    "by_severity": {
+      "clean": 18,
+      "critical": 0,
+      "high": 0,
+      "info": 21,
+      "low": 1,
+      "medium": 0
+    }
+  },
+  "findings_by_category": {
+    "hardware": [
+      {
+        "category": "hardware",
+        "subtype": "cpu_not_implemented",
+        "title": "Hardware cpu scan not yet implemented on this OS",
+        "severity": "info",
+        "detail": "Linux reads /proc and /sys directly; macOS/Windows need a platform-specific implementation not yet built.",
+        "source": "hardware.cpu",
+        "scanned_at": "2026-09-15T17:49:37.6406331Z"
+      },
+      {
+        "category": "hardware",
+        "subtype": "memory_not_implemented",
+        "title": "Hardware memory scan not yet implemented on this OS",
+        "severity": "info",
+        "detail": "Linux reads /proc and /sys directly; macOS/Windows need a platform-specific implementation not yet built.",
+        "source": "hardware.memory",
+        "scanned_at": "2026-09-15T17:49:37.6406331Z"
+      },
+      {
+        "category": "hardware",
+        "subtype": "storage_not_implemented",
+        "title": "Hardware storage scan not yet implemented on this OS",
+        "severity": "info",
+        "detail": "Linux reads /proc and /sys directly; macOS/Windows need a platform-specific implementation not yet built.",
+        "source": "hardware.storage",
+        "scanned_at": "2026-09-15T17:49:37.6406331Z"
+      },
+      {
+        "category": "hardware",
+        "subtype": "usb_not_implemented",
+        "title": "Hardware usb scan not yet implemented on this OS",
+        "severity": "info",
+        "detail": "Linux reads /proc and /sys directly; macOS/Windows need a platform-specific implementation not yet built.",
+        "source": "hardware.usb",
+        "scanned_at": "2026-09-15T17:49:37.6406331Z"
+      },
+      {
+        "category": "hardware",
+        "subtype": "pci_not_implemented",
+        "title": "Hardware pci scan not yet implemented on this OS",
+        "severity": "info",
+        "detail": "Linux reads /proc and /sys directly; macOS/Windows need a platform-specific implementation not yet built.",
+        "source": "hardware.pci",
+        "scanned_at": "2026-09-15T17:49:37.6406331Z"
+      },
+      {
+        "category": "hardware",
+        "subtype": "hw_cpu_vulnerabilities_not_implemented",
+        "title": "Hardware hw_cpu_vulnerabilities scan not yet implemented on this OS",
+        "severity": "info",
+        "detail": "Linux reads /proc and /sys directly; macOS/Windows need a platform-specific implementation not yet built.",
+        "source": "hardware.hw_cpu_vulnerabilities",
+        "scanned_at": "2026-09-15T17:49:37.6406331Z"
+      },
+      {
+        "category": "hardware",
+        "subtype": "tpm_not_implemented",
+        "title": "Hardware tpm scan not yet implemented on this OS",
+        "severity": "info",
+        "detail": "Linux reads /proc and /sys directly; macOS/Windows need a platform-specific implementation not yet built.",
+        "source": "hardware.tpm",
+        "scanned_at": "2026-09-15T17:49:37.6406331Z"
+      },
+      {
+        "category": "hardware",
+        "subtype": "secure_boot_not_implemented",
+        "title": "Hardware secure_boot scan not yet implemented on this OS",
+        "severity": "info",
+        "detail": "Linux reads /proc and /sys directly; macOS/Windows need a platform-specific implementation not yet built.",
+        "source": "hardware.secure_boot",
+        "scanned_at": "2026-09-15T17:49:37.6406331Z"
+      },
+      {
+        "category": "hardware",
+        "subtype": "disk_encryption_not_implemented",
+        "title": "Hardware disk_encryption scan not yet implemented on this OS",
+        "severity": "info",
+        "detail": "Linux reads /proc and /sys directly; macOS/Windows need a platform-specific implementation not yet built.",
+        "source": "hardware.disk_encryption",
+        "scanned_at": "2026-09-15T17:49:37.6406331Z"
+      }
+    ],
+    "network": [
+      {
+        "category": "network",
+        "subtype": "interface",
+        "title": "Network interface",
+        "severity": "clean",
+        "detail": "interface (up): fe80::434d:3f85:212e:6bee/64, 169.254.83.107/16",
+        "source": "network.interfaces",
+        "location": "Tailscale",
+        "evidence": {
+          "address_classification": [
+            {
+              "valid": true,
+              "version": "IPv6",
+              "scope": "link_local",
+              "is_public": false,
+              "detail": "Link-local address (this network segment only, not routed)"
+            },
+            {
+              "valid": true,
+              "version": "IPv4",
+              "scope": "link_local",
+              "is_public": false,
+              "detail": "Link-local address (this network segment only, not routed)"
+            }
+          ],
+          "addresses": [
+            "fe80::434d:3f85:212e:6bee/64",
+            "169.254.83.107/16"
+          ],
+          "loopback": false,
+          "mac": "",
+          "mtu": 1420,
+          "up": true
+        },
+        "scanned_at": "2026-09-15T17:49:37.5718356Z"
+      },
+      {
+        "category": "network",
+        "subtype": "interface",
+        "title": "Network interface",
+        "severity": "clean",
+        "detail": "interface (up): fe80::fab3:9400:6ac6:deeb/64, 192.168.56.1/24",
+        "source": "network.interfaces",
+        "location": "Ethernet 2",
+        "evidence": {
+          "address_classification": [
+            {
+              "valid": true,
+              "version": "IPv6",
+              "scope": "link_local",
+              "is_public": false,
+              "detail": "Link-local address (this network segment only, not routed)"
+            },
+            {
+              "valid": true,
+              "version": "IPv4",
+              "scope": "private",
+              "is_public": false,
+              "detail": "Private address (RFC 1918/4193) - not routable on the public internet"
+            }
+          ],
+          "addresses": [
+            "fe80::fab3:9400:6ac6:deeb/64",
+            "192.168.56.1/24"
+          ],
+          "loopback": false,
+          "mac": "0a:00:27:00:00:06",
+          "mtu": 1500,
+          "up": true
+        },
+        "scanned_at": "2026-09-15T17:49:37.5742374Z"
+      },
+      {
+        "category": "network",
+        "subtype": "interface",
+        "title": "Network interface",
+        "severity": "clean",
+        "detail": "interface (down): fe80::c720:7874:efe5:1154/64, 169.254.38.144/16",
+        "source": "network.interfaces",
+        "location": "Local Area Connection* 9",
+        "evidence": {
+          "address_classification": [
+            {
+              "valid": true,
+              "version": "IPv6",
+              "scope": "link_local",
+              "is_public": false,
+              "detail": "Link-local address (this network segment only, not routed)"
+            },
+            {
+              "valid": true,
+              "version": "IPv4",
+              "scope": "link_local",
+              "is_public": false,
+              "detail": "Link-local address (this network segment only, not routed)"
+            }
+          ],
+          "addresses": [
+            "fe80::c720:7874:efe5:1154/64",
+            "169.254.38.144/16"
+          ],
+          "loopback": false,
+          "mac": "46:fa:66:08:9c:33",
+          "mtu": 1500,
+          "up": false
+        },
+        "scanned_at": "2026-09-15T17:49:37.5769009Z"
+      },
+      {
+        "category": "network",
+        "subtype": "interface",
+        "title": "Network interface",
+        "severity": "clean",
+        "detail": "interface (down): fe80::dd63:77e:7e45:286b/64, 169.254.10.62/16",
+        "source": "network.interfaces",
+        "location": "Local Area Connection* 10",
+        "evidence": {
+          "address_classification": [
+            {
+              "valid": true,
+              "version": "IPv6",
+              "scope": "link_local",
+              "is_public": false,
+              "detail": "Link-local address (this network segment only, not routed)"
+            },
+            {
+              "valid": true,
+              "version": "IPv4",
+              "scope": "link_local",
+              "is_public": false,
+              "detail": "Link-local address (this network segment only, not routed)"
+            }
+          ],
+          "addresses": [
+            "fe80::dd63:77e:7e45:286b/64",
+            "169.254.10.62/16"
+          ],
+          "loopback": false,
+          "mac": "46:fa:66:08:8c:23",
+          "mtu": 1500,
+          "up": false
+        },
+        "scanned_at": "2026-09-15T17:49:37.5796189Z"
+      },
+      {
+        "category": "network",
+        "subtype": "interface",
+        "title": "Network interface",
+        "severity": "clean",
+        "detail": "interface (up): fd44:fbe7:7e56:5684:818:e5a8:554f:3027/64, fd44:fbe7:7e56:5684:4d62:69f5:1f4e:d51b/128, fe80::2f64:c987:e171:22a1/64, 192.168.50.216/24",
+        "source": "network.interfaces",
+        "location": "Wi-Fi",
+        "evidence": {
+          "address_classification": [
+            {
+              "valid": true,
+              "version": "IPv6",
+              "scope": "private",
+              "is_public": false,
+              "detail": "Private address (RFC 1918/4193) - not routable on the public internet"
+            },
+            {
+              "valid": true,
+              "version": "IPv6",
+              "scope": "private",
+              "is_public": false,
+              "detail": "Private address (RFC 1918/4193) - not routable on the public internet"
+            },
+            {
+              "valid": true,
+              "version": "IPv6",
+              "scope": "link_local",
+              "is_public": false,
+              "detail": "Link-local address (this network segment only, not routed)"
+            },
+            {
+              "valid": true,
+              "version": "IPv4",
+              "scope": "private",
+              "is_public": false,
+              "detail": "Private address (RFC 1918/4193) - not routable on the public internet"
+            }
+          ],
+          "addresses": [
+            "fd44:fbe7:7e56:5684:818:e5a8:554f:3027/64",
+            "fd44:fbe7:7e56:5684:4d62:69f5:1f4e:d51b/128",
+            "fe80::2f64:c987:e171:22a1/64",
+            "192.168.50.216/24"
+          ],
+          "loopback": false,
+          "mac": "44:fa:66:08:bc:13",
+          "mtu": 1500,
+          "up": true
+        },
+        "scanned_at": "2026-09-15T17:49:37.5816197Z"
+      },
+      {
+        "category": "network",
+        "subtype": "interface",
+        "title": "Network interface",
+        "severity": "clean",
+        "detail": "interface (down): fe80::c24:886c:4dc2:46d6/64, 169.254.93.71/16",
+        "source": "network.interfaces",
+        "location": "Bluetooth Network Connection",
+        "evidence": {
+          "address_classification": [
+            {
+              "valid": true,
+              "version": "IPv6",
+              "scope": "link_local",
+              "is_public": false,
+              "detail": "Link-local address (this network segment only, not routed)"
+            },
+            {
+              "valid": true,
+              "version": "IPv4",
+              "scope": "link_local",
+              "is_public": false,
+              "detail": "Link-local address (this network segment only, not routed)"
+            }
+          ],
+          "addresses": [
+            "fe80::c24:886c:4dc2:46d6/64",
+            "169.254.93.71/16"
+          ],
+          "loopback": false,
+          "mac": "44:fa:66:08:bc:14",
+          "mtu": 1500,
+          "up": false
+        },
+        "scanned_at": "2026-09-15T17:49:37.5841197Z"
+      },
+      {
+        "category": "network",
+        "subtype": "interface",
+        "title": "Network interface",
+        "severity": "clean",
+        "detail": "loopback interface (up): ::1/128, 127.0.0.1/8",
+        "source": "network.interfaces",
+        "location": "Loopback Pseudo-Interface 1",
+        "evidence": {
+          "address_classification": [
+            {
+              "valid": true,
+              "version": "IPv6",
+              "scope": "loopback",
+              "is_public": false,
+              "detail": "Loopback address (this machine, not reachable from elsewhere)"
+            },
+            {
+              "valid": true,
+              "version": "IPv4",
+              "scope": "loopback",
+              "is_public": false,
+              "detail": "Loopback address (this machine, not reachable from elsewhere)"
+            }
+          ],
+          "addresses": [
+            "::1/128",
+            "127.0.0.1/8"
+          ],
+          "loopback": true,
+          "mac": "",
+          "mtu": -1,
+          "up": true
+        },
+        "scanned_at": "2026-09-15T17:49:37.586619Z"
+      },
+      {
+        "category": "network",
+        "subtype": "hosts_entry",
+        "title": "Hosts file entry",
+        "severity": "clean",
+        "detail": "Copyright -\u003e ﻿#",
+        "source": "network.hosts",
+        "location": "C:\\WINDOWS\\System32\\drivers\\etc\\hosts",
+        "evidence": {
+          "domain": "Copyright",
+          "ip": "﻿#",
+          "ip_classification": {
+            "valid": false,
+            "is_public": false
+          }
+        },
+        "scanned_at": "2026-09-15T17:49:37.586619Z"
+      },
+      {
+        "category": "network",
+        "subtype": "hosts_entry",
+        "title": "Hosts file entry",
+        "severity": "clean",
+        "detail": "(c) -\u003e ﻿#",
+        "source": "network.hosts",
+        "location": "C:\\WINDOWS\\System32\\drivers\\etc\\hosts",
+        "evidence": {
+          "domain": "(c)",
+          "ip": "﻿#",
+          "ip_classification": {
+            "valid": false,
+            "is_public": false
+          }
+        },
+        "scanned_at": "2026-09-15T17:49:37.586619Z"
+      },
+      {
+        "category": "network",
+        "subtype": "hosts_entry",
+        "title": "Hosts file entry",
+        "severity": "clean",
+        "detail": "1993-2009 -\u003e ﻿#",
+        "source": "network.hosts",
+        "location": "C:\\WINDOWS\\System32\\drivers\\etc\\hosts",
+        "evidence": {
+          "domain": "1993-2009",
+          "ip": "﻿#",
+          "ip_classification": {
+            "valid": false,
+            "is_public": false
+          }
+        },
+        "scanned_at": "2026-09-15T17:49:37.586619Z"
+      },
+      {
+        "category": "network",
+        "subtype": "hosts_entry",
+        "title": "Hosts file entry",
+        "severity": "clean",
+        "detail": "Microsoft -\u003e ﻿#",
+        "source": "network.hosts",
+        "location": "C:\\WINDOWS\\System32\\drivers\\etc\\hosts",
+        "evidence": {
+          "domain": "Microsoft",
+          "ip": "﻿#",
+          "ip_classification": {
+            "valid": false,
+            "is_public": false
+          }
+        },
+        "scanned_at": "2026-09-15T17:49:37.586619Z"
+      },
+      {
+        "category": "network",
+        "subtype": "hosts_entry",
+        "title": "Hosts file entry",
+        "severity": "clean",
+        "detail": "Corp. -\u003e ﻿#",
+        "source": "network.hosts",
+        "location": "C:\\WINDOWS\\System32\\drivers\\etc\\hosts",
+        "evidence": {
+          "domain": "Corp.",
+          "ip": "﻿#",
+          "ip_classification": {
+            "valid": false,
+            "is_public": false
+          }
+        },
+        "scanned_at": "2026-09-15T17:49:37.586619Z"
+      },
+      {
+        "category": "network",
+        "subtype": "hosts_entry",
+        "title": "Hosts file entry",
+        "severity": "clean",
+        "detail": "host.docker.internal -\u003e 71.7.194.103",
+        "source": "network.hosts",
+        "location": "C:\\WINDOWS\\System32\\drivers\\etc\\hosts",
+        "evidence": {
+          "domain": "host.docker.internal",
+          "ip": "71.7.194.103",
+          "ip_classification": {
+            "valid": true,
+            "version": "IPv4",
+            "scope": "public",
+            "is_public": true,
+            "detail": "Publicly routable address"
+          }
+        },
+        "scanned_at": "2026-09-15T17:49:37.5871178Z"
+      },
+      {
+        "category": "network",
+        "subtype": "hosts_entry",
+        "title": "Hosts file entry",
+        "severity": "clean",
+        "detail": "gateway.docker.internal -\u003e 71.7.194.103",
+        "source": "network.hosts",
+        "location": "C:\\WINDOWS\\System32\\drivers\\etc\\hosts",
+        "evidence": {
+          "domain": "gateway.docker.internal",
+          "ip": "71.7.194.103",
+          "ip_classification": {
+            "valid": true,
+            "version": "IPv4",
+            "scope": "public",
+            "is_public": true,
+            "detail": "Publicly routable address"
+          }
+        },
+        "scanned_at": "2026-09-15T17:49:37.5871178Z"
+      },
+      {
+        "category": "network",
+        "subtype": "hosts_entry",
+        "title": "Hosts file entry",
+        "severity": "clean",
+        "detail": "kubernetes.docker.internal -\u003e 127.0.0.1",
+        "source": "network.hosts",
+        "location": "C:\\WINDOWS\\System32\\drivers\\etc\\hosts",
+        "evidence": {
+          "domain": "kubernetes.docker.internal",
+          "ip": "127.0.0.1",
+          "ip_classification": {
+            "valid": true,
+            "version": "IPv4",
+            "scope": "loopback",
+            "is_public": false,
+            "detail": "Loopback address (this machine, not reachable from elsewhere)"
+          }
+        },
+        "scanned_at": "2026-09-15T17:49:37.5871178Z"
+      },
+      {
+        "category": "network",
+        "subtype": "dns_resolvers",
+        "title": "Configured DNS resolvers",
+        "severity": "info",
+        "detail": "UNVERIFIED on real Windows - parser needs testing. 192.168.50.1, 192.168.50.1",
+        "source": "network.dns",
+        "location": "ipconfig /all",
+        "evidence": {
+          "servers": [
+            "192.168.50.1",
+            "192.168.50.1"
+          ]
+        },
+        "scanned_at": "2026-09-15T17:49:37.6130323Z"
+      },
+      {
+        "category": "network",
+        "subtype": "listening_ports_not_implemented",
+        "title": "Listening port enumeration not yet implemented on this OS",
+        "severity": "info",
+        "detail": "Linux reads /proc/net/tcp directly; macOS/Windows need a platform-specific implementation not yet built.",
+        "source": "network.ports",
+        "scanned_at": "2026-09-15T17:49:37.6130323Z"
+      },
+      {
+        "category": "network",
+        "subtype": "wifi_profiles_not_implemented",
+        "title": "Saved WiFi profile extraction not yet implemented on this OS",
+        "severity": "info",
+        "detail": "Linux reads NetworkManager's connection files directly. macOS keeps WiFi passwords in the Keychain (needs `security find-generic-password` or Keychain Services API - not yet built). Windows keeps them in the WLAN AutoConfig store (needs `netsh wlan show profile key=clear`, which requires admin and is per-profile - not yet built).",
+        "source": "network.wifi",
+        "scanned_at": "2026-09-15T17:49:37.6130323Z"
+      },
+      {
+        "category": "network",
+        "subtype": "firewall_not_implemented",
+        "title": "Firewall rule enumeration not yet implemented on this OS",
+        "severity": "info",
+        "detail": "Linux uses nft/iptables-save directly. macOS needs `pfctl -sr` (packet filter). Windows needs `netsh advfirewall firewall show rule` or the COM firewall API. Neither implemented yet.",
+        "source": "network.firewall",
+        "scanned_at": "2026-09-15T17:49:37.6130323Z"
+      }
+    ],
+    "software": [
+      {
+        "category": "software",
+        "subtype": "os_identity",
+        "title": "Operating system",
+        "severity": "info",
+        "detail": "windows/amd64 on host DESKTOP-F7GDAPC",
+        "source": "software.os",
+        "evidence": {
+          "arch": "amd64",
+          "hostname": "DESKTOP-F7GDAPC",
+          "num_cpu": 16,
+          "os": "windows"
+        },
+        "scanned_at": "2026-09-15T17:49:37.6130323Z"
+      },
+      {
+        "category": "software",
+        "subtype": "users_not_implemented",
+        "title": "Local account enumeration not yet implemented on Windows",
+        "severity": "info",
+        "detail": "Needs NetUserEnum (Win32 API) or `net user` output parsing - not yet built.",
+        "source": "software.users",
+        "scanned_at": "2026-09-15T17:49:37.6130323Z"
+      },
+      {
+        "category": "software",
+        "subtype": "processes_not_implemented",
+        "title": "Process enumeration not yet implemented on this OS",
+        "severity": "info",
+        "detail": "Linux reads /proc directly; macOS/Windows need a platform-specific implementation not yet built.",
+        "source": "software.processes",
+        "scanned_at": "2026-09-15T17:49:37.6130323Z"
+      },
+      {
+        "category": "software",
+        "subtype": "packages_not_implemented",
+        "title": "Installed-software inventory not yet implemented on this OS",
+        "severity": "info",
+        "detail": "Linux reads dpkg's status file (or rpm -qa) directly; macOS/Windows need a platform-specific implementation not yet built.",
+        "source": "software.packages",
+        "scanned_at": "2026-09-15T17:49:37.6130323Z"
+      },
+      {
+        "category": "software",
+        "subtype": "browser_history",
+        "title": "Firefox browsing history",
+        "severity": "clean",
+        "detail": "2000 history entries across 255 distinct domains.",
+        "source": "software.browser",
+        "location": "C:\\Users\\Diana\\AppData\\Roaming\\Mozilla\\Firefox\\Profiles\\sb3u5nzx.default-release\\places.sqlite",
+        "evidence": {
+          "distinct_domains": 255,
+          "entry_count": 2000,
+          "sample": [
+            " | https://support.mozilla.org/products/firefox",
+            " | https://support.mozilla.org/kb/customize-firefox-controls-buttons-and-toolbars?utm_source=firefox-browser\u0026utm_medium=default-bookmarks\u0026utm_campaign=customize",
+            " | https://www.mozilla.org/contribute/",
+            " | https://www.mozilla.org/about/",
+            " | http://24.222.136.22:5000/?timestamp=1764297623",
+            "Dianas NAS | https://24.222.136.22:5001/?timestamp=1764297623",
+            "Dianas NAS | https://24.222.136.22:5001/?timestamp=1764297623#/",
+            "Dianas NAS | https://24.222.136.22:5001/?timestamp=1764297623#/signin",
+            "Dianas NAS | https://24.222.136.22:5001/?timestamp=1764297623#/signin/password",
+            "Dianas NAS | https://24.222.136.22:5001/?timestamp=1764297623#/signin/authenticator/amfa",
+            "DeepSeek - Into the Unknown | https://chat.deepseek.com/",
+            " | http://71.7.195.63:32400/web/index.html#!/",
+            " | https://www.alisoneroman.com/recipes/spiced-chickpea-stew-with-coconut-and-turmeric",
+            " | https://nyaa.land/view/1315452",
+            " | https://umsi580.lsait.lsa.umich.edu/s/a-history-of-ballroom-documenting-the-era-of-ballroom-1972-1990/page/legends-of-ballroom",
+            " | https://archive.org/details/dragon-ball-z-v-26-2006-digital-an-hero-gold-empire/Dragon%20Ball%20Z%20v01%20%282003%29%20%28Digital%29%20%28AnHeroGold-Empire%29/",
+            " | https://shabinder.github.io/SpotiFlyer/",
+            "TokyBook - Your Gateway to Freemium Audiobooks | https://tokybook.com/",
+            " | https://www.reddit.com/r/EstrangedAdultChild/comments/nwerpm/is_anyone_no_contact_with_just_one_parent_while/",
+            "140: Sec. Arc - NotebookLM | https://notebooklm.google.com/notebook/0b0608bf-0f21-4e4d-8e50-f55d79e58e46",
+            " | https://tgo-tv.co/",
+            "Google Gemini | https://gemini.google.com/app",
+            " | https://popcornmovies.to/",
+            " | https://kimcartoon.li/",
+            "Learn Japanese with Paul Noble for Beginners – Complete Course By Paul Noble | AudioBook Download | https://audiobooksbee.com/learn-japanese-with-paul-noble-for-beginners-complete-course-by-paul-noble/"
+          ],
+          "top_domains": [
+            {
+              "domain": "docs.google.com",
+              "visits": 809
+            },
+            {
+              "domain": "dianas-nas.direct.quickconnect.to",
+              "visits": 131
+            },
+            {
+              "domain": "www.google.com",
+              "visits": 82
+            },
+            {
+              "domain": "www.limetorrents.fun",
+              "visits": 47
+            },
+            {
+              "domain": "www.youtube.com",
+              "visits": 43
+            },
+            {
+              "domain": "mail.google.com",
+              "visits": 38
+            },
+            {
+              "domain": "hurawatchz.to",
+              "visits": 33
+            },
+            {
+              "domain": "drive.google.com",
+              "visits": 33
+            },
+            {
+              "domain": "lightdownload.xyz",
+              "visits": 32
+            },
+            {
+              "domain": "courses.torontomu.ca",
+              "visits": 31
+            },
+            {
+              "domain": "en.wikipedia.org",
+              "visits": 27
+            },
+            {
+              "domain": "103.87.212.46",
+              "visits": 24
+            },
+            {
+              "domain": "www.pishop.ca",
+              "visits": 21
+            },
+            {
+              "domain": "www.reddit.com",
+              "visits": 20
+            },
+            {
+              "domain": "archive.org",
+              "visits": 20
+            }
+          ]
+        },
+        "scanned_at": "2026-09-15T17:49:37.6371325Z"
+      },
+      {
+        "category": "software",
+        "subtype": "browser_bookmarks",
+        "title": "Firefox bookmarks",
+        "severity": "clean",
+        "detail": "360 bookmarks found.",
+        "source": "software.browser",
+        "location": "C:\\Users\\Diana\\AppData\\Roaming\\Mozilla\\Firefox\\Profiles\\sb3u5nzx.default-release\\places.sqlite",
+        "evidence": {
+          "count": 360,
+          "sample": [
+            "menu",
+            "toolbar",
+            "tags",
+            "unfiled",
+            "mobile",
+            "Mozilla Firefox",
+            "Get Help -\u003e https://support.mozilla.org/products/firefox",
+            "Customize Firefox -\u003e https://support.mozilla.org/kb/customize-firefox-controls-buttons-and-toolbars?utm_source=firefox-browser\u0026utm_medium=default-bookmarks\u0026utm_campaign=customize",
+            "Get Involved -\u003e https://www.mozilla.org/contribute/",
+            "About Us -\u003e https://www.mozilla.org/about/",
+            "NAS -\u003e https://dianas-nas.direct.quickconnect.to:5001/",
+            "Plex -\u003e http://dianas-nas.direct.quickconnect.to:32400/web/index.html#!",
+            "YouTube -\u003e https://youtube.com/",
+            "Video",
+            "Download",
+            "vadapav.mov -\u003e https://vadapav.mov/",
+            "Pahe.in -\u003e https://pahe.ink/",
+            "lightdl.xyz -\u003e https://lightdl.xyz/",
+            "psa.wf -\u003e https://psa.wf/",
+            "MoviesMod | Movies Mod 2025, MoviesMod Official, MoviesMod.how",
+            "edytjedhgmdhm.abfhaqrhbnf.workers.dev -\u003e https://edytjedhgmdhm.abfhaqrhbnf.workers.dev/",
+            "AnimeFlix.in - Download Anime, Anime Download, 1080p Anime, 720p Anime, Latest Anime, Netflix Anime, Dubbed Anime Download, Watch Anime Online -\u003e https://animeflix.pm/",
+            "The Eternal Love Episode 1 Watch Online for Free with English Subtitles - Asiaflix | asiaflix.net -\u003e https://asiaflix.net/play/the-eternal-love-1/6747502335bdc245e4045ba8/1",
+            "Memorist Season 1 Complete WEB-DL 480p \u0026 720p – Pahe.in -\u003e https://pahe.ink/memorist-season-1-complete-web-dl-480p-720p/",
+            "AniMixPlay -\u003e https://animixplay.fun/"
+          ]
+        },
+        "scanned_at": "2026-09-15T17:49:37.6376337Z"
+      },
+      {
+        "category": "software",
+        "subtype": "browser_google_chrome_unavailable",
+        "title": "Google Chrome profiles",
+        "severity": "info",
+        "detail": "No Google Chrome profile directory found on this system.",
+        "source": "software.browser",
+        "scanned_at": "2026-09-15T17:49:37.6381331Z"
+      },
+      {
+        "category": "software",
+        "subtype": "browser_history",
+        "title": "Microsoft Edge browsing history",
+        "severity": "clean",
+        "detail": "353 history entries across 104 distinct domains.",
+        "source": "software.browser",
+        "location": "C:\\Users\\Diana\\AppData\\Local\\Microsoft\\Edge\\User Data\\Default\\History",
+        "evidence": {
+          "distinct_domains": 104,
+          "entry_count": 353,
+          "sample": [
+            "Get Help | https://support.mozilla.org/products/firefox",
+            "Customize Firefox | https://support.mozilla.org/kb/customize-firefox-controls-buttons-and-toolbars?utm_source=firefox-browser\u0026utm_medium=default-bookmarks\u0026utm_campaign=customize",
+            "Get Involved | https://www.mozilla.org/contribute/",
+            "About Us | https://www.mozilla.org/about/",
+            "Download - MEGA 25% | https://mega.nz/file/OKhGRDYD#oBi_MkGdbFua46b_wU6Jwv9tPkfiqPs6VS7IdQXdTFU",
+            "NAS | https://dianas-nas.direct.quickconnect.to:5001/",
+            "Plex | http://dianas-nas.direct.quickconnect.to:32400/web/index.html#!",
+            "YouTube | https://youtube.com/",
+            "vegamovies.si | https://vegamovies.si/",
+            "vadapav.mov | https://vadapav.mov/",
+            "Pahe.in | https://pahe.ink/",
+            "lightdl.xyz | https://lightdl.xyz/",
+            "psa.wf | https://psa.wf/",
+            "edytjedhgmdhm.abfhaqrhbnf.workers.dev | https://edytjedhgmdhm.abfhaqrhbnf.workers.dev/",
+            "MoviesMod | Movies Mod - 480p Movies, 720p Movies, 1080p Movies, Dual Audio Movies | https://moviesmod.fit/",
+            "Crave.ca | https://www.crave.ca/en/tv-shows",
+            "himovies.to | https://himovies.to/",
+            "Hurawatch | https://hurawatchz.to/",
+            "archive.org | https://archive.org/",
+            "uFlix.cc | https://uflix.cc/",
+            "flixhq.to | https://flixhq.to/",
+            "Watch Movies Online Free | Watch Series HD Free | https://hdtoday.tv/",
+            "SOAP2DAY | Official Website - Soap2day.to | https://soap2dayhq.to/",
+            "kissanime.help | https://kissanime.help/",
+            "kissanime.co | https://kissanime.co/?ref=help"
+          ],
+          "top_domains": [
+            {
+              "domain": "www.bing.com",
+              "visits": 27
+            },
+            {
+              "domain": "www.facebook.com",
+              "visits": 19
+            },
+            {
+              "domain": "103.87.212.46",
+              "visits": 18
+            },
+            {
+              "domain": "archive.org",
+              "visits": 17
+            },
+            {
+              "domain": "vadapav.mov",
+              "visits": 10
+            },
+            {
+              "domain": "explore.microsoft.com",
+              "visits": 9
+            },
+            {
+              "domain": "audiobooksbee.com",
+              "visits": 9
+            },
+            {
+              "domain": "hsktools.com",
+              "visits": 7
+            },
+            {
+              "domain": "www.mawiomigroup.ca",
+              "visits": 6
+            },
+            {
+              "domain": "vk.com",
+              "visits": 5
+            },
+            {
+              "domain": "rawg.io",
+              "visits": 5
+            },
+            {
+              "domain": "dianajhakim.com",
+              "visits": 5
+            },
+            {
+              "domain": "www.reddit.com",
+              "visits": 5
+            },
+            {
+              "domain": "dianajhakim.synology.me",
+              "visits": 5
+            },
+            {
+              "domain": "adblockplus.org",
+              "visits": 5
+            }
+          ]
+        },
+        "scanned_at": "2026-09-15T17:49:37.6406331Z"
+      },
+      {
+        "category": "software",
+        "subtype": "persistence_not_implemented",
+        "title": "Persistence/autostart scanning not yet implemented on this OS",
+        "severity": "info",
+        "detail": "Linux reads cron/systemd/XDG-autostart files directly. macOS needs launchd plist scanning (~/Library/LaunchAgents, /Library/Launch{Agents,Daemons}). Windows needs the Run/RunOnce registry keys and the Startup folder. Neither implemented yet.",
+        "source": "software.persistence",
+        "scanned_at": "2026-09-15T17:49:37.6406331Z"
+      }
+    ],
+    "storage": [
+      {
+        "category": "storage",
+        "subtype": "ssh_audit_not_implemented",
+        "title": "SSH key security audit not yet implemented on Windows",
+        "severity": "info",
+        "detail": "Windows uses NTFS ACLs, not POSIX permission bits, for key protection - needs a different check than the Linux/macOS implementation, not yet built.",
+        "source": "storage.ssh",
+        "scanned_at": "2026-09-15T17:49:37.6406331Z"
+      },
+      {
+        "category": "storage",
+        "subtype": "suid_not_applicable",
+        "title": "SUID/SGID scanning does not apply on Windows",
+        "severity": "info",
+        "detail": "Windows has no SUID/SGID concept - its privilege elevation model (UAC, service accounts, access tokens) is entirely different.",
+        "source": "storage.suid",
+        "scanned_at": "2026-09-15T17:49:37.6406331Z"
+      },
+      {
+        "category": "storage",
+        "subtype": "credential_file_docker_config",
+        "title": "Credential file found: config.json",
+        "severity": "low",
+        "detail": "Docker config contains registry auth (base64-encoded, NOT encrypted - trivially reversible).",
+        "source": "storage.secrets",
+        "location": "C:\\Users\\Diana\\.docker\\config.json",
+        "evidence": {
+          "contains_secret_material": false,
+          "size_bytes": 78
+        },
+        "scanned_at": "2026-09-15T17:49:37.6496353Z"
+      }
+    ],
+    "users": []
+  },
+  "findings": [
+    {
+      "category": "network",
+      "subtype": "interface",
+      "title": "Network interface",
+      "severity": "clean",
+      "detail": "interface (up): fe80::434d:3f85:212e:6bee/64, 169.254.83.107/16",
+      "source": "network.interfaces",
+      "location": "Tailscale",
+      "evidence": {
+        "address_classification": [
+          {
+            "valid": true,
+            "version": "IPv6",
+            "scope": "link_local",
+            "is_public": false,
+            "detail": "Link-local address (this network segment only, not routed)"
+          },
+          {
+            "valid": true,
+            "version": "IPv4",
+            "scope": "link_local",
+            "is_public": false,
+            "detail": "Link-local address (this network segment only, not routed)"
+          }
+        ],
+        "addresses": [
+          "fe80::434d:3f85:212e:6bee/64",
+          "169.254.83.107/16"
+        ],
+        "loopback": false,
+        "mac": "",
+        "mtu": 1420,
+        "up": true
+      },
+      "scanned_at": "2026-09-15T17:49:37.5718356Z"
+    },
+    {
+      "category": "network",
+      "subtype": "interface",
+      "title": "Network interface",
+      "severity": "clean",
+      "detail": "interface (up): fe80::fab3:9400:6ac6:deeb/64, 192.168.56.1/24",
+      "source": "network.interfaces",
+      "location": "Ethernet 2",
+      "evidence": {
+        "address_classification": [
+          {
+            "valid": true,
+            "version": "IPv6",
+            "scope": "link_local",
+            "is_public": false,
+            "detail": "Link-local address (this network segment only, not routed)"
+          },
+          {
+            "valid": true,
+            "version": "IPv4",
+            "scope": "private",
+            "is_public": false,
+            "detail": "Private address (RFC 1918/4193) - not routable on the public internet"
+          }
+        ],
+        "addresses": [
+          "fe80::fab3:9400:6ac6:deeb/64",
+          "192.168.56.1/24"
+        ],
+        "loopback": false,
+        "mac": "0a:00:27:00:00:06",
+        "mtu": 1500,
+        "up": true
+      },
+      "scanned_at": "2026-09-15T17:49:37.5742374Z"
+    },
+    {
+      "category": "network",
+      "subtype": "interface",
+      "title": "Network interface",
+      "severity": "clean",
+      "detail": "interface (down): fe80::c720:7874:efe5:1154/64, 169.254.38.144/16",
+      "source": "network.interfaces",
+      "location": "Local Area Connection* 9",
+      "evidence": {
+        "address_classification": [
+          {
+            "valid": true,
+            "version": "IPv6",
+            "scope": "link_local",
+            "is_public": false,
+            "detail": "Link-local address (this network segment only, not routed)"
+          },
+          {
+            "valid": true,
+            "version": "IPv4",
+            "scope": "link_local",
+            "is_public": false,
+            "detail": "Link-local address (this network segment only, not routed)"
+          }
+        ],
+        "addresses": [
+          "fe80::c720:7874:efe5:1154/64",
+          "169.254.38.144/16"
+        ],
+        "loopback": false,
+        "mac": "46:fa:66:08:9c:33",
+        "mtu": 1500,
+        "up": false
+      },
+      "scanned_at": "2026-09-15T17:49:37.5769009Z"
+    },
+    {
+      "category": "network",
+      "subtype": "interface",
+      "title": "Network interface",
+      "severity": "clean",
+      "detail": "interface (down): fe80::dd63:77e:7e45:286b/64, 169.254.10.62/16",
+      "source": "network.interfaces",
+      "location": "Local Area Connection* 10",
+      "evidence": {
+        "address_classification": [
+          {
+            "valid": true,
+            "version": "IPv6",
+            "scope": "link_local",
+            "is_public": false,
+            "detail": "Link-local address (this network segment only, not routed)"
+          },
+          {
+            "valid": true,
+            "version": "IPv4",
+            "scope": "link_local",
+            "is_public": false,
+            "detail": "Link-local address (this network segment only, not routed)"
+          }
+        ],
+        "addresses": [
+          "fe80::dd63:77e:7e45:286b/64",
+          "169.254.10.62/16"
+        ],
+        "loopback": false,
+        "mac": "46:fa:66:08:8c:23",
+        "mtu": 1500,
+        "up": false
+      },
+      "scanned_at": "2026-09-15T17:49:37.5796189Z"
+    },
+    {
+      "category": "network",
+      "subtype": "interface",
+      "title": "Network interface",
+      "severity": "clean",
+      "detail": "interface (up): fd44:fbe7:7e56:5684:818:e5a8:554f:3027/64, fd44:fbe7:7e56:5684:4d62:69f5:1f4e:d51b/128, fe80::2f64:c987:e171:22a1/64, 192.168.50.216/24",
+      "source": "network.interfaces",
+      "location": "Wi-Fi",
+      "evidence": {
+        "address_classification": [
+          {
+            "valid": true,
+            "version": "IPv6",
+            "scope": "private",
+            "is_public": false,
+            "detail": "Private address (RFC 1918/4193) - not routable on the public internet"
+          },
+          {
+            "valid": true,
+            "version": "IPv6",
+            "scope": "private",
+            "is_public": false,
+            "detail": "Private address (RFC 1918/4193) - not routable on the public internet"
+          },
+          {
+            "valid": true,
+            "version": "IPv6",
+            "scope": "link_local",
+            "is_public": false,
+            "detail": "Link-local address (this network segment only, not routed)"
+          },
+          {
+            "valid": true,
+            "version": "IPv4",
+            "scope": "private",
+            "is_public": false,
+            "detail": "Private address (RFC 1918/4193) - not routable on the public internet"
+          }
+        ],
+        "addresses": [
+          "fd44:fbe7:7e56:5684:818:e5a8:554f:3027/64",
+          "fd44:fbe7:7e56:5684:4d62:69f5:1f4e:d51b/128",
+          "fe80::2f64:c987:e171:22a1/64",
+          "192.168.50.216/24"
+        ],
+        "loopback": false,
+        "mac": "44:fa:66:08:bc:13",
+        "mtu": 1500,
+        "up": true
+      },
+      "scanned_at": "2026-09-15T17:49:37.5816197Z"
+    },
+    {
+      "category": "network",
+      "subtype": "interface",
+      "title": "Network interface",
+      "severity": "clean",
+      "detail": "interface (down): fe80::c24:886c:4dc2:46d6/64, 169.254.93.71/16",
+      "source": "network.interfaces",
+      "location": "Bluetooth Network Connection",
+      "evidence": {
+        "address_classification": [
+          {
+            "valid": true,
+            "version": "IPv6",
+            "scope": "link_local",
+            "is_public": false,
+            "detail": "Link-local address (this network segment only, not routed)"
+          },
+          {
+            "valid": true,
+            "version": "IPv4",
+            "scope": "link_local",
+            "is_public": false,
+            "detail": "Link-local address (this network segment only, not routed)"
+          }
+        ],
+        "addresses": [
+          "fe80::c24:886c:4dc2:46d6/64",
+          "169.254.93.71/16"
+        ],
+        "loopback": false,
+        "mac": "44:fa:66:08:bc:14",
+        "mtu": 1500,
+        "up": false
+      },
+      "scanned_at": "2026-09-15T17:49:37.5841197Z"
+    },
+    {
+      "category": "network",
+      "subtype": "interface",
+      "title": "Network interface",
+      "severity": "clean",
+      "detail": "loopback interface (up): ::1/128, 127.0.0.1/8",
+      "source": "network.interfaces",
+      "location": "Loopback Pseudo-Interface 1",
+      "evidence": {
+        "address_classification": [
+          {
+            "valid": true,
+            "version": "IPv6",
+            "scope": "loopback",
+            "is_public": false,
+            "detail": "Loopback address (this machine, not reachable from elsewhere)"
+          },
+          {
+            "valid": true,
+            "version": "IPv4",
+            "scope": "loopback",
+            "is_public": false,
+            "detail": "Loopback address (this machine, not reachable from elsewhere)"
+          }
+        ],
+        "addresses": [
+          "::1/128",
+          "127.0.0.1/8"
+        ],
+        "loopback": true,
+        "mac": "",
+        "mtu": -1,
+        "up": true
+      },
+      "scanned_at": "2026-09-15T17:49:37.586619Z"
+    },
+    {
+      "category": "network",
+      "subtype": "hosts_entry",
+      "title": "Hosts file entry",
+      "severity": "clean",
+      "detail": "Copyright -\u003e ﻿#",
+      "source": "network.hosts",
+      "location": "C:\\WINDOWS\\System32\\drivers\\etc\\hosts",
+      "evidence": {
+        "domain": "Copyright",
+        "ip": "﻿#",
+        "ip_classification": {
+          "valid": false,
+          "is_public": false
+        }
+      },
+      "scanned_at": "2026-09-15T17:49:37.586619Z"
+    },
+    {
+      "category": "network",
+      "subtype": "hosts_entry",
+      "title": "Hosts file entry",
+      "severity": "clean",
+      "detail": "(c) -\u003e ﻿#",
+      "source": "network.hosts",
+      "location": "C:\\WINDOWS\\System32\\drivers\\etc\\hosts",
+      "evidence": {
+        "domain": "(c)",
+        "ip": "﻿#",
+        "ip_classification": {
+          "valid": false,
+          "is_public": false
+        }
+      },
+      "scanned_at": "2026-09-15T17:49:37.586619Z"
+    },
+    {
+      "category": "network",
+      "subtype": "hosts_entry",
+      "title": "Hosts file entry",
+      "severity": "clean",
+      "detail": "1993-2009 -\u003e ﻿#",
+      "source": "network.hosts",
+      "location": "C:\\WINDOWS\\System32\\drivers\\etc\\hosts",
+      "evidence": {
+        "domain": "1993-2009",
+        "ip": "﻿#",
+        "ip_classification": {
+          "valid": false,
+          "is_public": false
+        }
+      },
+      "scanned_at": "2026-09-15T17:49:37.586619Z"
+    },
+    {
+      "category": "network",
+      "subtype": "hosts_entry",
+      "title": "Hosts file entry",
+      "severity": "clean",
+      "detail": "Microsoft -\u003e ﻿#",
+      "source": "network.hosts",
+      "location": "C:\\WINDOWS\\System32\\drivers\\etc\\hosts",
+      "evidence": {
+        "domain": "Microsoft",
+        "ip": "﻿#",
+        "ip_classification": {
+          "valid": false,
+          "is_public": false
+        }
+      },
+      "scanned_at": "2026-09-15T17:49:37.586619Z"
+    },
+    {
+      "category": "network",
+      "subtype": "hosts_entry",
+      "title": "Hosts file entry",
+      "severity": "clean",
+      "detail": "Corp. -\u003e ﻿#",
+      "source": "network.hosts",
+      "location": "C:\\WINDOWS\\System32\\drivers\\etc\\hosts",
+      "evidence": {
+        "domain": "Corp.",
+        "ip": "﻿#",
+        "ip_classification": {
+          "valid": false,
+          "is_public": false
+        }
+      },
+      "scanned_at": "2026-09-15T17:49:37.586619Z"
+    },
+    {
+      "category": "network",
+      "subtype": "hosts_entry",
+      "title": "Hosts file entry",
+      "severity": "clean",
+      "detail": "host.docker.internal -\u003e 71.7.194.103",
+      "source": "network.hosts",
+      "location": "C:\\WINDOWS\\System32\\drivers\\etc\\hosts",
+      "evidence": {
+        "domain": "host.docker.internal",
+        "ip": "71.7.194.103",
+        "ip_classification": {
+          "valid": true,
+          "version": "IPv4",
+          "scope": "public",
+          "is_public": true,
+          "detail": "Publicly routable address"
+        }
+      },
+      "scanned_at": "2026-09-15T17:49:37.5871178Z"
+    },
+    {
+      "category": "network",
+      "subtype": "hosts_entry",
+      "title": "Hosts file entry",
+      "severity": "clean",
+      "detail": "gateway.docker.internal -\u003e 71.7.194.103",
+      "source": "network.hosts",
+      "location": "C:\\WINDOWS\\System32\\drivers\\etc\\hosts",
+      "evidence": {
+        "domain": "gateway.docker.internal",
+        "ip": "71.7.194.103",
+        "ip_classification": {
+          "valid": true,
+          "version": "IPv4",
+          "scope": "public",
+          "is_public": true,
+          "detail": "Publicly routable address"
+        }
+      },
+      "scanned_at": "2026-09-15T17:49:37.5871178Z"
+    },
+    {
+      "category": "network",
+      "subtype": "hosts_entry",
+      "title": "Hosts file entry",
+      "severity": "clean",
+      "detail": "kubernetes.docker.internal -\u003e 127.0.0.1",
+      "source": "network.hosts",
+      "location": "C:\\WINDOWS\\System32\\drivers\\etc\\hosts",
+      "evidence": {
+        "domain": "kubernetes.docker.internal",
+        "ip": "127.0.0.1",
+        "ip_classification": {
+          "valid": true,
+          "version": "IPv4",
+          "scope": "loopback",
+          "is_public": false,
+          "detail": "Loopback address (this machine, not reachable from elsewhere)"
+        }
+      },
+      "scanned_at": "2026-09-15T17:49:37.5871178Z"
+    },
+    {
+      "category": "network",
+      "subtype": "dns_resolvers",
+      "title": "Configured DNS resolvers",
+      "severity": "info",
+      "detail": "UNVERIFIED on real Windows - parser needs testing. 192.168.50.1, 192.168.50.1",
+      "source": "network.dns",
+      "location": "ipconfig /all",
+      "evidence": {
+        "servers": [
+          "192.168.50.1",
+          "192.168.50.1"
+        ]
+      },
+      "scanned_at": "2026-09-15T17:49:37.6130323Z"
+    },
+    {
+      "category": "network",
+      "subtype": "listening_ports_not_implemented",
+      "title": "Listening port enumeration not yet implemented on this OS",
+      "severity": "info",
+      "detail": "Linux reads /proc/net/tcp directly; macOS/Windows need a platform-specific implementation not yet built.",
+      "source": "network.ports",
+      "scanned_at": "2026-09-15T17:49:37.6130323Z"
+    },
+    {
+      "category": "network",
+      "subtype": "wifi_profiles_not_implemented",
+      "title": "Saved WiFi profile extraction not yet implemented on this OS",
+      "severity": "info",
+      "detail": "Linux reads NetworkManager's connection files directly. macOS keeps WiFi passwords in the Keychain (needs `security find-generic-password` or Keychain Services API - not yet built). Windows keeps them in the WLAN AutoConfig store (needs `netsh wlan show profile key=clear`, which requires admin and is per-profile - not yet built).",
+      "source": "network.wifi",
+      "scanned_at": "2026-09-15T17:49:37.6130323Z"
+    },
+    {
+      "category": "network",
+      "subtype": "firewall_not_implemented",
+      "title": "Firewall rule enumeration not yet implemented on this OS",
+      "severity": "info",
+      "detail": "Linux uses nft/iptables-save directly. macOS needs `pfctl -sr` (packet filter). Windows needs `netsh advfirewall firewall show rule` or the COM firewall API. Neither implemented yet.",
+      "source": "network.firewall",
+      "scanned_at": "2026-09-15T17:49:37.6130323Z"
+    },
+    {
+      "category": "software",
+      "subtype": "os_identity",
+      "title": "Operating system",
+      "severity": "info",
+      "detail": "windows/amd64 on host DESKTOP-F7GDAPC",
+      "source": "software.os",
+      "evidence": {
+        "arch": "amd64",
+        "hostname": "DESKTOP-F7GDAPC",
+        "num_cpu": 16,
+        "os": "windows"
+      },
+      "scanned_at": "2026-09-15T17:49:37.6130323Z"
+    },
+    {
+      "category": "software",
+      "subtype": "users_not_implemented",
+      "title": "Local account enumeration not yet implemented on Windows",
+      "severity": "info",
+      "detail": "Needs NetUserEnum (Win32 API) or `net user` output parsing - not yet built.",
+      "source": "software.users",
+      "scanned_at": "2026-09-15T17:49:37.6130323Z"
+    },
+    {
+      "category": "software",
+      "subtype": "processes_not_implemented",
+      "title": "Process enumeration not yet implemented on this OS",
+      "severity": "info",
+      "detail": "Linux reads /proc directly; macOS/Windows need a platform-specific implementation not yet built.",
+      "source": "software.processes",
+      "scanned_at": "2026-09-15T17:49:37.6130323Z"
+    },
+    {
+      "category": "software",
+      "subtype": "packages_not_implemented",
+      "title": "Installed-software inventory not yet implemented on this OS",
+      "severity": "info",
+      "detail": "Linux reads dpkg's status file (or rpm -qa) directly; macOS/Windows need a platform-specific implementation not yet built.",
+      "source": "software.packages",
+      "scanned_at": "2026-09-15T17:49:37.6130323Z"
+    },
+    {
+      "category": "software",
+      "subtype": "browser_history",
+      "title": "Firefox browsing history",
+      "severity": "clean",
+      "detail": "2000 history entries across 255 distinct domains.",
+      "source": "software.browser",
+      "location": "C:\\Users\\Diana\\AppData\\Roaming\\Mozilla\\Firefox\\Profiles\\sb3u5nzx.default-release\\places.sqlite",
+      "evidence": {
+        "distinct_domains": 255,
+        "entry_count": 2000,
+        "sample": [
+          " | https://support.mozilla.org/products/firefox",
+          " | https://support.mozilla.org/kb/customize-firefox-controls-buttons-and-toolbars?utm_source=firefox-browser\u0026utm_medium=default-bookmarks\u0026utm_campaign=customize",
+          " | https://www.mozilla.org/contribute/",
+          " | https://www.mozilla.org/about/",
+          " | http://24.222.136.22:5000/?timestamp=1764297623",
+          "Dianas NAS | https://24.222.136.22:5001/?timestamp=1764297623",
+          "Dianas NAS | https://24.222.136.22:5001/?timestamp=1764297623#/",
+          "Dianas NAS | https://24.222.136.22:5001/?timestamp=1764297623#/signin",
+          "Dianas NAS | https://24.222.136.22:5001/?timestamp=1764297623#/signin/password",
+          "Dianas NAS | https://24.222.136.22:5001/?timestamp=1764297623#/signin/authenticator/amfa",
+          "DeepSeek - Into the Unknown | https://chat.deepseek.com/",
+          " | http://71.7.195.63:32400/web/index.html#!/",
+          " | https://www.alisoneroman.com/recipes/spiced-chickpea-stew-with-coconut-and-turmeric",
+          " | https://nyaa.land/view/1315452",
+          " | https://umsi580.lsait.lsa.umich.edu/s/a-history-of-ballroom-documenting-the-era-of-ballroom-1972-1990/page/legends-of-ballroom",
+          " | https://archive.org/details/dragon-ball-z-v-26-2006-digital-an-hero-gold-empire/Dragon%20Ball%20Z%20v01%20%282003%29%20%28Digital%29%20%28AnHeroGold-Empire%29/",
+          " | https://shabinder.github.io/SpotiFlyer/",
+          "TokyBook - Your Gateway to Freemium Audiobooks | https://tokybook.com/",
+          " | https://www.reddit.com/r/EstrangedAdultChild/comments/nwerpm/is_anyone_no_contact_with_just_one_parent_while/",
+          "140: Sec. Arc - NotebookLM | https://notebooklm.google.com/notebook/0b0608bf-0f21-4e4d-8e50-f55d79e58e46",
+          " | https://tgo-tv.co/",
+          "Google Gemini | https://gemini.google.com/app",
+          " | https://popcornmovies.to/",
+          " | https://kimcartoon.li/",
+          "Learn Japanese with Paul Noble for Beginners – Complete Course By Paul Noble | AudioBook Download | https://audiobooksbee.com/learn-japanese-with-paul-noble-for-beginners-complete-course-by-paul-noble/"
+        ],
+        "top_domains": [
+          {
+            "domain": "docs.google.com",
+            "visits": 809
+          },
+          {
+            "domain": "dianas-nas.direct.quickconnect.to",
+            "visits": 131
+          },
+          {
+            "domain": "www.google.com",
+            "visits": 82
+          },
+          {
+            "domain": "www.limetorrents.fun",
+            "visits": 47
+          },
+          {
+            "domain": "www.youtube.com",
+            "visits": 43
+          },
+          {
+            "domain": "mail.google.com",
+            "visits": 38
+          },
+          {
+            "domain": "hurawatchz.to",
+            "visits": 33
+          },
+          {
+            "domain": "drive.google.com",
+            "visits": 33
+          },
+          {
+            "domain": "lightdownload.xyz",
+            "visits": 32
+          },
+          {
+            "domain": "courses.torontomu.ca",
+            "visits": 31
+          },
+          {
+            "domain": "en.wikipedia.org",
+            "visits": 27
+          },
+          {
+            "domain": "103.87.212.46",
+            "visits": 24
+          },
+          {
+            "domain": "www.pishop.ca",
+            "visits": 21
+          },
+          {
+            "domain": "www.reddit.com",
+            "visits": 20
+          },
+          {
+            "domain": "archive.org",
+            "visits": 20
+          }
+        ]
+      },
+      "scanned_at": "2026-09-15T17:49:37.6371325Z"
+    },
+    {
+      "category": "software",
+      "subtype": "browser_bookmarks",
+      "title": "Firefox bookmarks",
+      "severity": "clean",
+      "detail": "360 bookmarks found.",
+      "source": "software.browser",
+      "location": "C:\\Users\\Diana\\AppData\\Roaming\\Mozilla\\Firefox\\Profiles\\sb3u5nzx.default-release\\places.sqlite",
+      "evidence": {
+        "count": 360,
+        "sample": [
+          "menu",
+          "toolbar",
+          "tags",
+          "unfiled",
+          "mobile",
+          "Mozilla Firefox",
+          "Get Help -\u003e https://support.mozilla.org/products/firefox",
+          "Customize Firefox -\u003e https://support.mozilla.org/kb/customize-firefox-controls-buttons-and-toolbars?utm_source=firefox-browser\u0026utm_medium=default-bookmarks\u0026utm_campaign=customize",
+          "Get Involved -\u003e https://www.mozilla.org/contribute/",
+          "About Us -\u003e https://www.mozilla.org/about/",
+          "NAS -\u003e https://dianas-nas.direct.quickconnect.to:5001/",
+          "Plex -\u003e http://dianas-nas.direct.quickconnect.to:32400/web/index.html#!",
+          "YouTube -\u003e https://youtube.com/",
+          "Video",
+          "Download",
+          "vadapav.mov -\u003e https://vadapav.mov/",
+          "Pahe.in -\u003e https://pahe.ink/",
+          "lightdl.xyz -\u003e https://lightdl.xyz/",
+          "psa.wf -\u003e https://psa.wf/",
+          "MoviesMod | Movies Mod 2025, MoviesMod Official, MoviesMod.how",
+          "edytjedhgmdhm.abfhaqrhbnf.workers.dev -\u003e https://edytjedhgmdhm.abfhaqrhbnf.workers.dev/",
+          "AnimeFlix.in - Download Anime, Anime Download, 1080p Anime, 720p Anime, Latest Anime, Netflix Anime, Dubbed Anime Download, Watch Anime Online -\u003e https://animeflix.pm/",
+          "The Eternal Love Episode 1 Watch Online for Free with English Subtitles - Asiaflix | asiaflix.net -\u003e https://asiaflix.net/play/the-eternal-love-1/6747502335bdc245e4045ba8/1",
+          "Memorist Season 1 Complete WEB-DL 480p \u0026 720p – Pahe.in -\u003e https://pahe.ink/memorist-season-1-complete-web-dl-480p-720p/",
+          "AniMixPlay -\u003e https://animixplay.fun/"
+        ]
+      },
+      "scanned_at": "2026-09-15T17:49:37.6376337Z"
+    },
+    {
+      "category": "software",
+      "subtype": "browser_google_chrome_unavailable",
+      "title": "Google Chrome profiles",
+      "severity": "info",
+      "detail": "No Google Chrome profile directory found on this system.",
+      "source": "software.browser",
+      "scanned_at": "2026-09-15T17:49:37.6381331Z"
+    },
+    {
+      "category": "software",
+      "subtype": "browser_history",
+      "title": "Microsoft Edge browsing history",
+      "severity": "clean",
+      "detail": "353 history entries across 104 distinct domains.",
+      "source": "software.browser",
+      "location": "C:\\Users\\Diana\\AppData\\Local\\Microsoft\\Edge\\User Data\\Default\\History",
+      "evidence": {
+        "distinct_domains": 104,
+        "entry_count": 353,
+        "sample": [
+          "Get Help | https://support.mozilla.org/products/firefox",
+          "Customize Firefox | https://support.mozilla.org/kb/customize-firefox-controls-buttons-and-toolbars?utm_source=firefox-browser\u0026utm_medium=default-bookmarks\u0026utm_campaign=customize",
+          "Get Involved | https://www.mozilla.org/contribute/",
+          "About Us | https://www.mozilla.org/about/",
+          "Download - MEGA 25% | https://mega.nz/file/OKhGRDYD#oBi_MkGdbFua46b_wU6Jwv9tPkfiqPs6VS7IdQXdTFU",
+          "NAS | https://dianas-nas.direct.quickconnect.to:5001/",
+          "Plex | http://dianas-nas.direct.quickconnect.to:32400/web/index.html#!",
+          "YouTube | https://youtube.com/",
+          "vegamovies.si | https://vegamovies.si/",
+          "vadapav.mov | https://vadapav.mov/",
+          "Pahe.in | https://pahe.ink/",
+          "lightdl.xyz | https://lightdl.xyz/",
+          "psa.wf | https://psa.wf/",
+          "edytjedhgmdhm.abfhaqrhbnf.workers.dev | https://edytjedhgmdhm.abfhaqrhbnf.workers.dev/",
+          "MoviesMod | Movies Mod - 480p Movies, 720p Movies, 1080p Movies, Dual Audio Movies | https://moviesmod.fit/",
+          "Crave.ca | https://www.crave.ca/en/tv-shows",
+          "himovies.to | https://himovies.to/",
+          "Hurawatch | https://hurawatchz.to/",
+          "archive.org | https://archive.org/",
+          "uFlix.cc | https://uflix.cc/",
+          "flixhq.to | https://flixhq.to/",
+          "Watch Movies Online Free | Watch Series HD Free | https://hdtoday.tv/",
+          "SOAP2DAY | Official Website - Soap2day.to | https://soap2dayhq.to/",
+          "kissanime.help | https://kissanime.help/",
+          "kissanime.co | https://kissanime.co/?ref=help"
+        ],
+        "top_domains": [
+          {
+            "domain": "www.bing.com",
+            "visits": 27
+          },
+          {
+            "domain": "www.facebook.com",
+            "visits": 19
+          },
+          {
+            "domain": "103.87.212.46",
+            "visits": 18
+          },
+          {
+            "domain": "archive.org",
+            "visits": 17
+          },
+          {
+            "domain": "vadapav.mov",
+            "visits": 10
+          },
+          {
+            "domain": "explore.microsoft.com",
+            "visits": 9
+          },
+          {
+            "domain": "audiobooksbee.com",
+            "visits": 9
+          },
+          {
+            "domain": "hsktools.com",
+            "visits": 7
+          },
+          {
+            "domain": "www.mawiomigroup.ca",
+            "visits": 6
+          },
+          {
+            "domain": "vk.com",
+            "visits": 5
+          },
+          {
+            "domain": "rawg.io",
+            "visits": 5
+          },
+          {
+            "domain": "dianajhakim.com",
+            "visits": 5
+          },
+          {
+            "domain": "www.reddit.com",
+            "visits": 5
+          },
+          {
+            "domain": "dianajhakim.synology.me",
+            "visits": 5
+          },
+          {
+            "domain": "adblockplus.org",
+            "visits": 5
+          }
+        ]
+      },
+      "scanned_at": "2026-09-15T17:49:37.6406331Z"
+    },
+    {
+      "category": "software",
+      "subtype": "persistence_not_implemented",
+      "title": "Persistence/autostart scanning not yet implemented on this OS",
+      "severity": "info",
+      "detail": "Linux reads cron/systemd/XDG-autostart files directly. macOS needs launchd plist scanning (~/Library/LaunchAgents, /Library/Launch{Agents,Daemons}). Windows needs the Run/RunOnce registry keys and the Startup folder. Neither implemented yet.",
+      "source": "software.persistence",
+      "scanned_at": "2026-09-15T17:49:37.6406331Z"
+    },
+    {
+      "category": "hardware",
+      "subtype": "cpu_not_implemented",
+      "title": "Hardware cpu scan not yet implemented on this OS",
+      "severity": "info",
+      "detail": "Linux reads /proc and /sys directly; macOS/Windows need a platform-specific implementation not yet built.",
+      "source": "hardware.cpu",
+      "scanned_at": "2026-09-15T17:49:37.6406331Z"
+    },
+    {
+      "category": "hardware",
+      "subtype": "memory_not_implemented",
+      "title": "Hardware memory scan not yet implemented on this OS",
+      "severity": "info",
+      "detail": "Linux reads /proc and /sys directly; macOS/Windows need a platform-specific implementation not yet built.",
+      "source": "hardware.memory",
+      "scanned_at": "2026-09-15T17:49:37.6406331Z"
+    },
+    {
+      "category": "hardware",
+      "subtype": "storage_not_implemented",
+      "title": "Hardware storage scan not yet implemented on this OS",
+      "severity": "info",
+      "detail": "Linux reads /proc and /sys directly; macOS/Windows need a platform-specific implementation not yet built.",
+      "source": "hardware.storage",
+      "scanned_at": "2026-09-15T17:49:37.6406331Z"
+    },
+    {
+      "category": "hardware",
+      "subtype": "usb_not_implemented",
+      "title": "Hardware usb scan not yet implemented on this OS",
+      "severity": "info",
+      "detail": "Linux reads /proc and /sys directly; macOS/Windows need a platform-specific implementation not yet built.",
+      "source": "hardware.usb",
+      "scanned_at": "2026-09-15T17:49:37.6406331Z"
+    },
+    {
+      "category": "hardware",
+      "subtype": "pci_not_implemented",
+      "title": "Hardware pci scan not yet implemented on this OS",
+      "severity": "info",
+      "detail": "Linux reads /proc and /sys directly; macOS/Windows need a platform-specific implementation not yet built.",
+      "source": "hardware.pci",
+      "scanned_at": "2026-09-15T17:49:37.6406331Z"
+    },
+    {
+      "category": "hardware",
+      "subtype": "hw_cpu_vulnerabilities_not_implemented",
+      "title": "Hardware hw_cpu_vulnerabilities scan not yet implemented on this OS",
+      "severity": "info",
+      "detail": "Linux reads /proc and /sys directly; macOS/Windows need a platform-specific implementation not yet built.",
+      "source": "hardware.hw_cpu_vulnerabilities",
+      "scanned_at": "2026-09-15T17:49:37.6406331Z"
+    },
+    {
+      "category": "hardware",
+      "subtype": "tpm_not_implemented",
+      "title": "Hardware tpm scan not yet implemented on this OS",
+      "severity": "info",
+      "detail": "Linux reads /proc and /sys directly; macOS/Windows need a platform-specific implementation not yet built.",
+      "source": "hardware.tpm",
+      "scanned_at": "2026-09-15T17:49:37.6406331Z"
+    },
+    {
+      "category": "hardware",
+      "subtype": "secure_boot_not_implemented",
+      "title": "Hardware secure_boot scan not yet implemented on this OS",
+      "severity": "info",
+      "detail": "Linux reads /proc and /sys directly; macOS/Windows need a platform-specific implementation not yet built.",
+      "source": "hardware.secure_boot",
+      "scanned_at": "2026-09-15T17:49:37.6406331Z"
+    },
+    {
+      "category": "hardware",
+      "subtype": "disk_encryption_not_implemented",
+      "title": "Hardware disk_encryption scan not yet implemented on this OS",
+      "severity": "info",
+      "detail": "Linux reads /proc and /sys directly; macOS/Windows need a platform-specific implementation not yet built.",
+      "source": "hardware.disk_encryption",
+      "scanned_at": "2026-09-15T17:49:37.6406331Z"
+    },
+    {
+      "category": "storage",
+      "subtype": "ssh_audit_not_implemented",
+      "title": "SSH key security audit not yet implemented on Windows",
+      "severity": "info",
+      "detail": "Windows uses NTFS ACLs, not POSIX permission bits, for key protection - needs a different check than the Linux/macOS implementation, not yet built.",
+      "source": "storage.ssh",
+      "scanned_at": "2026-09-15T17:49:37.6406331Z"
+    },
+    {
+      "category": "storage",
+      "subtype": "suid_not_applicable",
+      "title": "SUID/SGID scanning does not apply on Windows",
+      "severity": "info",
+      "detail": "Windows has no SUID/SGID concept - its privilege elevation model (UAC, service accounts, access tokens) is entirely different.",
+      "source": "storage.suid",
+      "scanned_at": "2026-09-15T17:49:37.6406331Z"
+    },
+    {
+      "category": "storage",
+      "subtype": "credential_file_docker_config",
+      "title": "Credential file found: config.json",
+      "severity": "low",
+      "detail": "Docker config contains registry auth (base64-encoded, NOT encrypted - trivially reversible).",
+      "source": "storage.secrets",
+      "location": "C:\\Users\\Diana\\.docker\\config.json",
+      "evidence": {
+        "contains_secret_material": false,
+        "size_bytes": 78
+      },
+      "scanned_at": "2026-09-15T17:49:37.6496353Z"
+    }
+  ]
+}

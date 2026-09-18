@@ -5,6 +5,8 @@
       "label": "Email address",
       "pattern": "[A-Za-z0-9._%+\\-]+@[A-Za-z0-9.\\-]+\\.[A-Za-z]{2,}",
       "severity": "medium",
+      "importance_score": 70,
+      "description": "Email addresses",
       "checksum": "none"
     },
     {
@@ -12,6 +14,8 @@
       "label": "IPv4 address",
       "pattern": "\\b(?:(?:25[0-5]|2[0-4][0-9]|1[0-9]{2}|[1-9]?[0-9])\\.){3}(?:25[0-5]|2[0-4][0-9]|1[0-9]{2}|[1-9]?[0-9])\\b",
       "severity": "low",
+      "importance_score": 30,
+      "description": "IPv4 addresses",
       "checksum": "none"
     },
     {
@@ -19,6 +23,8 @@
       "label": "Credit card number",
       "pattern": "\\b(?:\\d[ -]?){13,19}\\b",
       "severity": "critical",
+      "importance_score": 85,
+      "description": "Credit card numbers",
       "checksum": "luhn",
       "min_digits": 13,
       "max_digits": 19,
@@ -57,6 +63,8 @@
       "label": "US Social Security Number",
       "pattern": "\\b\\d{3}-\\d{2}-\\d{4}\\b",
       "severity": "critical",
+      "importance_score": 90,
+      "description": "US Social Security numbers",
       "checksum": "ssn_us",
       "context_keywords": {
         "en": [
@@ -70,6 +78,8 @@
       "label": "Canadian Social Insurance Number",
       "pattern": "\\b\\d{3}[ -]\\d{3}[ -]\\d{3}\\b",
       "severity": "critical",
+      "importance_score": 90,
+      "description": "Canadian Social Insurance numbers",
       "checksum": "luhn",
       "min_digits": 9,
       "max_digits": 9,
@@ -89,6 +99,8 @@
       "label": "AWS access key",
       "pattern": "\\b(AKIA|ASIA)[0-9A-Z]{16}\\b",
       "severity": "critical",
+      "importance_score": 90,
+      "description": "AWS access keys",
       "checksum": "none"
     },
     {
@@ -96,6 +108,8 @@
       "label": "Private key material",
       "pattern": "-----BEGIN (RSA |EC |OPENSSH |DSA |)PRIVATE KEY-----",
       "severity": "critical",
+      "importance_score": 95,
+      "description": "Private key material",
       "checksum": "none"
     },
     {
@@ -103,6 +117,8 @@
       "label": "Generic API key / secret assignment",
       "pattern": "(?i)(api[_-]?key|secret|token|passwd|password)['\"]?\\s*[:=]\\s*['\"][A-Za-z0-9_\\-]{16,}['\"]",
       "severity": "high",
+      "importance_score": 95,
+      "description": "Passwords, tokens and API secrets",
       "checksum": "none"
     },
     {
@@ -110,6 +126,8 @@
       "label": "Phone number",
       "pattern": "\\b(?:\\+?\\d{1,3}[ .\\-]?)?(?:\\(?\\d{3}\\)?[ .\\-]?)\\d{3}[ .\\-]?\\d{4}\\b",
       "severity": "low",
+      "importance_score": 60,
+      "description": "Phone numbers",
       "checksum": "none",
       "context_keywords": {
         "en": [
@@ -142,6 +160,8 @@
       "label": "Possible passport number",
       "pattern": "\\b[A-Z]{1,2}\\d{6,9}\\b",
       "severity": "medium",
+      "importance_score": 75,
+      "description": "Passport numbers",
       "checksum": "none",
       "context_keywords": {
         "en": [
@@ -164,6 +184,8 @@
       "label": "Quebec health insurance number (RAMQ)",
       "pattern": "\\b[A-Za-z]{4}[ -]?\\d{4}[ -]?\\d{4}\\b",
       "severity": "critical",
+      "importance_score": 90,
+      "description": "Quebec health insurance (RAMQ) numbers",
       "checksum": "none",
       "context_keywords": {
         "en": [
@@ -184,6 +206,8 @@
       "label": "Date of birth (ISO format)",
       "pattern": "\\b(?:19|20)\\d{2}-(?:0[1-9]|1[0-2])-(?:0[1-9]|[12]\\d|3[01])\\b",
       "severity": "low",
+      "importance_score": 40,
+      "description": "Dates of birth and other personal dates",
       "checksum": "none",
       "context_keywords": {
         "en": [
@@ -206,6 +230,8 @@
       "label": "Street address",
       "pattern": "\\b\\d+\\s+[A-Za-z][A-Za-z\\s]{2,30}\\s+(?:Street|St|Avenue|Ave|Road|Rd|Boulevard|Blvd|Drive|Dr|Lane|Ln|Court|Ct|Place|Pl|Terrace|Ter|Circle|Cir|Way|Parkway|Pkwy|Highway|Hwy|Trail|Trl|Square|Sq|Loop|Crescent|Cres)\\b\\.?",
       "severity": "low",
+      "importance_score": 65,
+      "description": "Street addresses",
       "checksum": "none",
       "context_keywords": {
         "en": [
@@ -227,6 +253,8 @@
       "label": "Driver license number (US-style)",
       "pattern": "\\b[A-Z]{1,2}\\d{6,8}\\b",
       "severity": "low",
+      "importance_score": 50,
+      "description": "Driver license numbers",
       "checksum": "none",
       "context_keywords": {
         "en": [

@@ -26,7 +26,6 @@
   .panel { background: var(--panel); border: 1px solid var(--border); border-radius: 10px; padding: 18px 20px; margin-bottom: 20px; }
   .panel h3 { margin: 0 0 12px; font-size: 14px; color: var(--text); }
   .panel p.hint { color: var(--muted); font-size: 12px; margin: -6px 0 12px; }
-  .scan-form { display: flex; gap: 10px; flex-wrap: wrap; align-items: end; }
   .field { display: flex; flex-direction: column; gap: 4px; }
   .field label { font-size: 12px; color: var(--muted); }
   input[type=text], textarea { background: #10131a; border: 1px solid var(--border); color: var(--text); padding: 8px 10px; border-radius: 6px; font-size: 14px; }
@@ -78,15 +77,26 @@
   .empty { color: var(--muted); font-size: 13px; padding: 8px 0; }
   #results { display: none; }
 
-  .resultbox { margin-top: 12px; background: #0b0d12; border: 1px solid var(--border); border-radius: 8px; padding: 12px 14px; font-size: 13px; }
-  .resultbox .row { display:flex; justify-content: space-between; gap: 10px; margin-bottom: 6px; }
-  .resultbox .label { color: var(--muted); }
-  .resultbox pre { white-space: pre-wrap; word-break: break-all; font-family: ui-monospace, monospace; margin: 6px 0 0; color: var(--text); }
   .warn-line { color: var(--high); font-size: 13px; margin-top: 4px; }
   .candidate-row { display:flex; justify-content: space-between; gap: 10px; padding: 6px 0; border-bottom: 1px solid var(--border); font-size: 12px; }
   .candidate-row:last-child { border-bottom: none; }
   .candidate-row.best { color: var(--clean); font-weight: 600; }
   .inline-row { display: flex; gap: 10px; flex-wrap: wrap; align-items: end; margin-bottom: 10px; }
+
+  /* ============ Split-pane (input | output) workspace ============ */
+  .split { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; align-items: start; }
+  .pane-input { display: flex; flex-direction: column; gap: 12px; min-width: 0; }
+  .pane-input textarea { min-height: 130px; }
+  textarea.tall { min-height: 170px; }
+  .pane-output { background: #0b0d12; border: 1px solid var(--border); border-radius: 8px; padding: 12px 14px; min-height: 220px; display: flex; flex-direction: column; }
+  .pane-output .output-label { color: var(--muted); font-size: 11px; text-transform: uppercase; letter-spacing: .05em; margin-bottom: 10px; }
+  .pane-output .row { display:flex; justify-content: space-between; gap: 10px; margin-bottom: 6px; }
+  .pane-output .row span:last-child { text-align: right; word-break: break-all; }
+  .pane-output .label { color: var(--muted); }
+  .pane-output pre { white-space: pre-wrap; word-break: break-all; font-family: ui-monospace, monospace; margin: 6px 0 0; color: var(--text); }
+  .output-body { overflow-y: auto; max-height: 480px; flex: 1; font-size: 13px; padding-right: 4px; }
+  .output-body p.hint { color: var(--muted); font-size: 12px; }
+  @media (max-width: 820px) { .split { grid-template-columns: 1fr; } }
 </style>
 </head>
 <body>
@@ -106,25 +116,10 @@
 <!-- ============================= SCAN TAB ============================= -->
 <div class="tabpage active" id="tab-scan">
   <div class="panel">
-    <div class="scan-form">
-      <div class="field">
-        <label for="target">Target path (file or folder)</label>
-        <div style="display:flex; gap:6px;">
-          <input type="text" id="target" placeholder="/home/you/Documents">
-          <button type="button" class="secondary" onclick="browseTarget()" id="browseBtn">Browse&hellip;</button>
-        </div>
-      </div>
-      <div class="field">
-        <label>Selecting</label>
-        <div style="display:flex; gap:12px; padding:8px 0; font-size:13px;">
-          <label style="display:flex; align-items:center; gap:5px; color:var(--text); font-size:13px;">
-            <input type="radio" name="browseMode" value="folder" checked> Folder
-          </label>
-          <label style="display:flex; align-items:center; gap:5px; color:var(--text); font-size:13px;">
-            <input type="radio" name="browseMode" value="files"> File(s)
-          </label>
-        </div>
-      </div>
+    <p class="hint" style="margin-top:14px;">Pick exactly what to search for and include in the report - everything is on by default. Every check still runs; this only controls what's shown/saved.</p>
+    <div id="checksContainer"></div>
+
+    <div style="margin-top:18px; display:flex; justify-content:flex-end; align-items:end; gap:12px;">
       <div class="field">
         <label for="minSeverity">Minimum severity to show</label>
         <select id="minSeverity">
@@ -137,44 +132,6 @@
       </div>
       <button id="scanBtn" onclick="runScan()">Scan</button>
     </div>
-    <div class="checks">
-      <label><input type="checkbox" class="cat-toggle" value="files" checked onchange="toggleCatBlock('files')"> Storage / Files</label>
-      <label><input type="checkbox" class="cat-toggle" value="network" checked onchange="toggleCatBlock('network')"> Network</label>
-      <label><input type="checkbox" class="cat-toggle" value="software" checked onchange="toggleCatBlock('software')"> Software</label>
-      <label><input type="checkbox" class="cat-toggle" value="hardware" checked onchange="toggleCatBlock('hardware')"> Hardware</label>
-    </div>
-
-    <p class="hint" style="margin-top:14px;">Pick exactly what to search for and include in the report - everything is on by default. Every check still runs; this only controls what's shown/saved.</p>
-    <div id="checksContainer"></div>
-
-    <details class="cat-block">
-      <summary>Custom search - find a specific person or exact text</summary>
-      <p class="hint" style="margin-top:8px;">Enter any combination of name parts - searches for realistic real-world formats (Mike Brown, Mike H. Brown, Brown, Mike, etc.), not just the exact spelling typed here.</p>
-      <div class="inline-row">
-        <div class="field"><label>First name</label><input type="text" id="nameFirst" placeholder="Mike"></div>
-        <div class="field"><label>Middle name</label><input type="text" id="nameMiddle" placeholder="Hawk"></div>
-        <div class="field"><label>Last name</label><input type="text" id="nameLast" placeholder="Brown"></div>
-        <button type="button" class="secondary" onclick="addNameQuery()">Add name</button>
-      </div>
-      <div id="nameQueryList"></div>
-
-      <p class="hint" style="margin-top:14px;">Or search for an exact string or regular expression:</p>
-      <div class="inline-row">
-        <div class="field" style="flex:1;"><label>Text or regex</label><input type="text" id="termText" placeholder="OperationPhoenix" style="min-width:220px;"></div>
-        <div class="field">
-          <label style="display:flex; align-items:center; gap:5px; color:var(--text);">
-            <input type="checkbox" id="termIsRegex"> Treat as regex
-          </label>
-        </div>
-        <div class="field">
-          <label style="display:flex; align-items:center; gap:5px; color:var(--text);">
-            <input type="checkbox" id="termCaseSensitive"> Case-sensitive
-          </label>
-        </div>
-        <button type="button" class="secondary" onclick="addTermQuery()">Add term</button>
-      </div>
-      <div id="termQueryList"></div>
-    </details>
 
     <div class="status" id="status"></div>
   </div>
@@ -201,66 +158,185 @@
 <!-- ============================ CIPHER TAB ============================ -->
 <div class="tabpage" id="tab-cipher">
   <div class="panel">
-    <h3>Analyze - auto-detect + decode</h3>
-    <p class="hint">Paste text. Checks whether it already reads as a known language, tries every supported cipher (Caesar/ROT13/Atbash/Vigenère) if not, and separately looks for embedded encoded substrings (base64/hex/base32/binary/URL-encoding).</p>
-    <textarea id="analyzeInput" placeholder="Paste text to analyze..."></textarea>
-    <div style="margin-top:10px;"><button onclick="cipherAnalyze()">Analyze</button></div>
-    <div id="analyzeResult"></div>
-  </div>
-
-  <div class="panel">
-    <h3>Decode</h3>
-    <p class="hint">Pick a cipher. Leave the key blank for Caesar or Vigenère and it will attempt to recover the key automatically (brute force for Caesar, cryptanalysis for Vigenère) - useful when you know or suspect the cipher but not the key.</p>
-    <div class="inline-row">
-      <div class="field">
-        <label for="decodeMethod">Cipher / encoding</label>
-        <select id="decodeMethod" onchange="updateKeyVisibility('decode')">
-          <option value="caesar">Caesar</option>
-          <option value="rot13">ROT13</option>
-          <option value="atbash">Atbash</option>
-          <option value="vigenere">Vigenère</option>
-          <option value="base64">Base64</option>
-          <option value="hex">Hex</option>
-          <option value="base32">Base32</option>
-          <option value="binary">Binary (8-bit groups)</option>
-          <option value="url">URL encoding</option>
-        </select>
+    <h3>Analyze &amp; Decode</h3>
+    <p class="hint">Paste text below. <strong style="color:var(--text);">Auto-detect</strong> runs the full check: does it already read as a known language, does a classical cipher crack it (Caesar/ROT13/Atbash/Vigen&#232;re, with automatic key recovery), and are there embedded encoded substrings (base64/hex/base32/binary/URL/...). If it isn't a known language or crackable cipher, we fall back to a rough dictionary gloss &mdash; foreign-language mode. Pick a specific cipher or key to target just that method; pick a language to force the gloss.</p>
+    <div class="split">
+      <div class="pane-input">
+        <textarea id="adInput" class="tall" placeholder="Paste text to analyze or decode..."></textarea>
+        <div class="inline-row">
+          <div class="field" style="flex:1; min-width:180px;">
+            <label for="adMethod">Cipher / encoding</label>
+            <select id="adMethod" onchange="updateADKeyVisibility()">
+              <option value="">Auto-detect (recommended)</option>
+              <option value="caesar">Caesar</option>
+              <option value="rot13">ROT13</option>
+              <option value="atbash">Atbash</option>
+              <option value="vigenere">Vigen&#232;re</option>
+              <option value="beaufort">Beaufort</option>
+              <option value="autokey">Autokey</option>
+              <option value="base64">Base64</option>
+              <option value="hex">Hex</option>
+              <option value="base32">Base32</option>
+              <option value="binary">Binary (8-bit groups)</option>
+              <option value="url">URL encoding</option>
+              <option value="morse">Morse code</option>
+              <option value="octal">Octal (ASCII)</option>
+              <option value="decimal">Decimal (ASCII)</option>
+              <option value="leetspeak">Leetspeak</option>
+              <option value="xor">XOR (hex-encoded)</option>
+              <option value="railfence">Rail fence</option>
+              <option value="scytale">Scytale</option>
+              <option value="columnar">Columnar transposition</option>
+              <option value="playfair">Playfair</option>
+              <option value="keyboard">Keyboard shift (QWERTY)</option>
+              <option value="rot47">ROT47</option>
+              <option disabled style="border-bottom:1px solid #444;margin:2px 0 4px">───────── two-square / polygraphic ─────────</option>
+              <option value="two_square">Two-square</option>
+              <option value="four_square">Four-square</option>
+              <option value="polybius">Polybius</option>
+              <option disabled style="border-bottom:1px solid #444;margin:2px 0 4px">───────── transposition ─────────</option>
+              <option value="route_cipher">Route cipher</option>
+              <option disabled style="border-bottom:1px solid #444;margin:2px 0 4px">───────── stream ciphers ─────────</option>
+              <option value="rc4">RC4</option>
+              <option value="lfsr">LFSR (stream)</option>
+              <option value="one_time_pad">One-time pad</option>
+              <option value="chacha20">ChaCha20</option>
+              <option value="salsa20">Salsa20</option>
+              <option value="enigma">Enigma (simplified)</option>
+              <option disabled style="border-bottom:1px solid #444;margin:2px 0 4px">───────── block ciphers ─────────</option>
+              <option value="des">Simple DES</option>
+              <option value="spn">Working SPN</option>
+              <option value="tea">Working TEA</option>
+              <option disabled style="border-bottom:1px solid #444;margin:2px 0 4px">───────── static symbol maps ─────────</option>
+              <option value="braille">Braille</option>
+              <option value="wingdings">Wingdings</option>
+              <option value="arrow">Arrow symbols</option>
+              <option value="simple_symbols">Simple symbols</option>
+              <option value="symbol_lookalikes">Symbol lookalikes</option>
+              <option value="vowel_to_number">Vowel to number</option>
+              <option value="emoticons">Emoticons</option>
+            </select>
+          </div>
+          <div class="field" id="adKeyField" style="display:none; flex:1; min-width:160px;">
+            <label for="adKey">Key / shift</label>
+            <input type="text" id="adKey" placeholder="e.g. 3, or SECRET">
+            <p class="hint" style="margin:2px 0 0;">Blank = auto-recover (Caesar/Vigen&#232;re/Beaufort/XOR/transpositions); Playfair &amp; Autokey always need a key</p>
+          </div>
+          <div class="field" id="adVariantField" style="display:none; flex:1; min-width:160px;">
+            <label for="adVariant">Variant / layout</label>
+            <select id="adVariant"><option value="">Default</option></select>
+          </div>
+          <div class="field" style="min-width:190px;">
+            <label for="adLang">Language (gloss)</label>
+            <select id="adLang"><option value="">Auto (dictionary)</option></select>
+            <p class="hint" style="margin:2px 0 0;">Optional; forces the dictionary gloss below</p>
+          </div>
+        </div>
+        <div><button id="adBtn" onclick="analyzeDecode()">Analyze &amp; Decode</button></div>
       </div>
-      <div class="field" id="decodeKeyField">
-        <label for="decodeKey">Key (shift number for Caesar, word for Vigenère - leave blank if unknown)</label>
-        <input type="text" id="decodeKey" placeholder="e.g. 3, or SECRET">
+      <div class="pane-output">
+        <div class="output-label">Result</div>
+        <div id="adResult" class="output-body"><p class="hint">Results appear here. Your input never leaves this machine.</p></div>
       </div>
     </div>
-    <textarea id="decodeInput" placeholder="Paste ciphertext to decode..."></textarea>
-    <div style="margin-top:10px;"><button onclick="cipherDecode()">Decode</button></div>
-    <div id="decodeResult"></div>
   </div>
 
   <div class="panel">
     <h3>Encode</h3>
-    <div class="inline-row">
-      <div class="field">
-        <label for="encodeMethod">Cipher / encoding</label>
-        <select id="encodeMethod" onchange="updateKeyVisibility('encode')">
-          <option value="caesar">Caesar</option>
-          <option value="rot13">ROT13</option>
-          <option value="atbash">Atbash</option>
-          <option value="vigenere">Vigenère</option>
-          <option value="base64">Base64</option>
-          <option value="hex">Hex</option>
-          <option value="base32">Base32</option>
-          <option value="binary">Binary (8-bit groups)</option>
-          <option value="url">URL encoding</option>
-        </select>
+    <p class="hint">Pick a cipher or encoding and encode plaintext. Key is required for caesar/vigen&#232;re/beaufort/autokey/xor/rail fence/scytale/columnar/playfair/keyboard.</p>
+    <div class="split">
+      <div class="pane-input">
+        <div class="inline-row">
+          <div class="field" style="flex:1; min-width:180px;">
+            <label for="encodeMethod">Cipher / encoding</label>
+            <select id="encodeMethod" onchange="updateEncodeKeyVisibility()">
+              <option value="caesar">Caesar</option>
+              <option value="rot13">ROT13</option>
+              <option value="atbash">Atbash</option>
+              <option value="vigenere">Vigen&#232;re</option>
+              <option value="beaufort">Beaufort</option>
+              <option value="autokey">Autokey</option>
+              <option value="base64">Base64</option>
+              <option value="hex">Hex</option>
+              <option value="base32">Base32</option>
+              <option value="binary">Binary (8-bit groups)</option>
+              <option value="url">URL encoding</option>
+              <option value="morse">Morse code</option>
+              <option value="octal">Octal (ASCII)</option>
+              <option value="decimal">Decimal (ASCII)</option>
+              <option value="leetspeak">Leetspeak</option>
+              <option value="xor">XOR</option>
+              <option value="railfence">Rail fence</option>
+              <option value="scytale">Scytale</option>
+              <option value="columnar">Columnar transposition</option>
+              <option value="playfair">Playfair</option>
+              <option value="keyboard">Keyboard shift (QWERTY)</option>
+              <option value="rot47">ROT47</option>
+              <option disabled style="border-bottom:1px solid #444;margin:2px 0 4px">───────── two-square / polygraphic ─────────</option>
+              <option value="two_square">Two-square</option>
+              <option value="four_square">Four-square</option>
+              <option value="polybius">Polybius</option>
+              <option disabled style="border-bottom:1px solid #444;margin:2px 0 4px">───────── transposition ─────────</option>
+              <option value="route_cipher">Route cipher</option>
+              <option disabled style="border-bottom:1px solid #444;margin:2px 0 4px">───────── stream ciphers ─────────</option>
+              <option value="rc4">RC4</option>
+              <option value="lfsr">LFSR (stream)</option>
+              <option value="one_time_pad">One-time pad</option>
+              <option value="chacha20">ChaCha20</option>
+              <option value="salsa20">Salsa20</option>
+              <option value="enigma">Enigma (simplified)</option>
+              <option disabled style="border-bottom:1px solid #444;margin:2px 0 4px">───────── block ciphers ─────────</option>
+              <option value="des">Simple DES</option>
+              <option value="spn">Working SPN</option>
+              <option value="tea">Working TEA</option>
+              <option disabled style="border-bottom:1px solid #444;margin:2px 0 4px">───────── static symbol maps ─────────</option>
+              <option value="braille">Braille</option>
+              <option value="wingdings">Wingdings</option>
+              <option value="arrow">Arrow symbols</option>
+              <option value="simple_symbols">Simple symbols</option>
+              <option value="symbol_lookalikes">Symbol lookalikes</option>
+              <option value="vowel_to_number">Vowel to number</option>
+              <option value="emoticons">Emoticons</option>
+            </select>
+          </div>
+          <div class="field" id="encodeKeyField" style="display:none; flex:1; min-width:160px;">
+            <label for="encodeKey">Key (required)</label>
+            <input type="text" id="encodeKey" placeholder="e.g. 3, or SECRET">
+          </div>
+          <div class="field" id="encodeVariantField" style="display:none; flex:1; min-width:160px;">
+            <label for="encodeVariant">Variant / layout</label>
+            <select id="encodeVariant"><option value="">Default</option></select>
+          </div>
+        </div>
+        <textarea id="encodeInput" placeholder="Paste plaintext to encode..."></textarea>
+        <div><button id="encodeBtn" onclick="cipherEncode()">Encode</button></div>
       </div>
-      <div class="field" id="encodeKeyField">
-        <label for="encodeKey">Key (required for Caesar/Vigenère)</label>
-        <input type="text" id="encodeKey" placeholder="e.g. 3, or SECRET">
+      <div class="pane-output">
+        <div class="output-label">Result</div>
+        <div id="encodeResult" class="output-body"><p class="hint">Encoded output appears here.</p></div>
       </div>
     </div>
-    <textarea id="encodeInput" placeholder="Paste plaintext to encode..."></textarea>
-    <div style="margin-top:10px;"><button onclick="cipherEncode()">Encode</button></div>
-    <div id="encodeResult"></div>
+  </div>
+
+  <div class="panel">
+    <h3>Translate - rough dictionary gloss</h3>
+    <p class="hint">Treats a foreign language like a cipher to decode: looks up each word/character in a real bilingual dictionary and shows the breakdown, plus a crude word-for-word rendering. This is NOT machine translation - no grammar, no reordering, no sense disambiguation - just an honest, literal gloss.</p>
+    <div class="split">
+      <div class="pane-input">
+        <div class="inline-row">
+          <div class="field" style="min-width:200px;">
+            <label for="translateLang">Language</label>
+            <select id="translateLang"><option value="">Loading...</option></select>
+          </div>
+        </div>
+        <textarea id="translateInput" placeholder="Paste text to translate..."></textarea>
+        <div><button id="translateBtn" onclick="runTranslate()">Translate</button></div>
+      </div>
+      <div class="pane-output">
+        <div class="output-label">Result</div>
+        <div id="translateResult" class="output-body"><p class="hint">Translation gloss appears here.</p></div>
+      </div>
+    </div>
   </div>
 </div>
 
@@ -269,29 +345,50 @@
   <div class="panel">
     <h3>File Hash Calculator</h3>
     <p class="hint">Computes MD5 / SHA-1 / SHA-256 / SHA-512 for a file on this machine - standard integrity verification / fingerprinting.</p>
-    <div class="inline-row">
-      <div class="field"><label for="hashPath">File path</label><input type="text" id="hashPath" placeholder="/path/to/file"></div>
-      <button onclick="hashFile()">Calculate</button>
+    <div class="split">
+      <div class="pane-input">
+        <div class="inline-row">
+          <div class="field" style="flex:1; min-width:200px;"><label for="hashPath">File path</label><input type="text" id="hashPath" placeholder="/path/to/file"></div>
+        </div>
+        <div><button id="hashBtn" onclick="hashFile()">Calculate</button></div>
+      </div>
+      <div class="pane-output">
+        <div class="output-label">Result</div>
+        <div id="hashResult" class="output-body"><p class="hint">Hashes appear here.</p></div>
+      </div>
     </div>
-    <div id="hashResult"></div>
   </div>
 
   <div class="panel">
     <h3>Hash Identifier</h3>
     <p class="hint">Guesses likely algorithm(s) from a bare hash string's length/format. Not certain by nature (e.g. MD5 and NTLM are both 32 hex chars) - shows every plausible match.</p>
-    <div class="inline-row">
-      <div class="field"><label for="hashGuessInput">Hash string</label><input type="text" id="hashGuessInput" placeholder="5f4dcc3b5aa765d61d8327deb882cf99"></div>
-      <button onclick="identifyHash()">Identify</button>
+    <div class="split">
+      <div class="pane-input">
+        <div class="inline-row">
+          <div class="field" style="flex:1; min-width:200px;"><label for="hashGuessInput">Hash string</label><input type="text" id="hashGuessInput" placeholder="5f4dcc3b5aa765d61d8327deb882cf99"></div>
+        </div>
+        <div><button id="identifyBtn" onclick="identifyHash()">Identify</button></div>
+      </div>
+      <div class="pane-output">
+        <div class="output-label">Result</div>
+        <div id="identifyResult" class="output-body"><p class="hint">Likely algorithms appear here.</p></div>
+      </div>
     </div>
-    <div id="identifyResult"></div>
   </div>
 
   <div class="panel">
     <h3>JWT Decoder</h3>
     <p class="hint">Decodes a JWT's header and payload for inspection. Does NOT verify the signature (that needs the signing secret, which this tool never has) - flags alg=none and expired/not-yet-valid tokens.</p>
-    <textarea id="jwtInput" placeholder="Paste a JWT (header.payload.signature)..."></textarea>
-    <div style="margin-top:10px;"><button onclick="jwtDecode()">Decode</button></div>
-    <div id="jwtResult"></div>
+    <div class="split">
+      <div class="pane-input">
+        <textarea id="jwtInput" class="tall" placeholder="Paste a JWT (header.payload.signature)..."></textarea>
+        <div><button id="jwtBtn" onclick="jwtDecode()">Decode</button></div>
+      </div>
+      <div class="pane-output">
+        <div class="output-label">Result</div>
+        <div id="jwtResult" class="output-body"><p class="hint">Decoded header/payload appear here.</p></div>
+      </div>
+    </div>
   </div>
 </div>
 
@@ -383,41 +480,133 @@ function renderChecksUI() {
     const details = document.createElement('details');
     details.className = 'cat-block';
     details.id = 'catblock-' + cat;
+    details.open = false;
+
+    // Checkbox lives IN the summary row now - one control per category
+    // that both enables/disables it and opens/closes its dropdown.
     const summary = document.createElement('summary');
-    summary.textContent = catLabels[cat] + ' - what to search/include';
+    summary.innerHTML = `<label style="display:inline-flex; align-items:center; gap:7px; cursor:pointer;" onclick="event.stopPropagation();">` +
+      `<input type="checkbox" class="cat-toggle" value="${cat}" checked onchange="toggleCatBlock('${cat}')"> ${escapeHtml(catLabels[cat])}</label>`;
     details.appendChild(summary);
 
-    const checksDiv = document.createElement('div');
-    checksDiv.className = 'checks';
-    for (const d of defs) {
-      const label = document.createElement('label');
-      label.innerHTML = `<input type="checkbox" class="check-${cat}" value="${d.id}" checked> ${escapeHtml(d.label)}`;
-      checksDiv.appendChild(label);
-    }
-    details.appendChild(checksDiv);
+    const body = document.createElement('div');
+    body.id = 'catbody-' + cat;
+    body.style.marginTop = '10px';
 
-    if (cat === 'files' && piiTypes.length > 0) {
-      const piiWrap = document.createElement('div');
-      piiWrap.innerHTML = '<p class="hint" style="margin-top:12px;">Search for specific PII types only (all selected by default):</p>';
-      const grid = document.createElement('div');
-      grid.className = 'pii-grid';
-      for (const p of piiTypes) {
+    // --- Target path (file or folder) - Storage/Files only ---
+    if (cat === 'files') {
+      const targetWrap = document.createElement('div');
+      targetWrap.innerHTML = `
+        <div class="field">
+          <label for="target">Target path (file or folder)</label>
+          <div style="display:flex; gap:6px;">
+            <input type="text" id="target" placeholder="/home/you/Documents">
+            <button type="button" class="secondary" onclick="browseTarget()" id="browseBtn">Browse&hellip;</button>
+          </div>
+        </div>
+        <div class="field">
+          <label>Selecting</label>
+          <div style="display:flex; gap:12px; padding:8px 0; font-size:13px;">
+            <label style="display:flex; align-items:center; gap:5px; color:var(--text); font-size:13px;">
+              <input type="radio" name="browseMode" value="folder" checked> Folder
+            </label>
+            <label style="display:flex; align-items:center; gap:5px; color:var(--text); font-size:13px;">
+              <input type="radio" name="browseMode" value="files"> File(s)
+            </label>
+          </div>
+        </div>`;
+      body.appendChild(targetWrap.firstElementChild);
+    }
+
+    // --- General section: every non-PII check for this category ---
+    const generalDefs = defs.filter(d => d.id !== 'pii');
+    if (generalDefs.length > 0) {
+      const generalHeader = document.createElement('div');
+      generalHeader.innerHTML = '<p class="hint" style="margin:0 0 4px;"><strong style="color:var(--text);">General</strong></p>';
+      body.appendChild(generalHeader);
+      const checksDiv = document.createElement('div');
+      checksDiv.className = 'checks';
+      for (const d of generalDefs) {
         const label = document.createElement('label');
-        label.innerHTML = `<input type="checkbox" class="pii-type" value="${p.id}" checked> ${escapeHtml(p.label)}`;
-        grid.appendChild(label);
+        label.innerHTML = `<input type="checkbox" class="check-${cat}" value="${d.id}" checked> ${escapeHtml(d.label)}`;
+        checksDiv.appendChild(label);
       }
-      piiWrap.appendChild(grid);
-      details.appendChild(piiWrap);
+      body.appendChild(checksDiv);
     }
 
+    // --- PII detections section (Storage/Files only) ---
+    if (cat === 'files') {
+      const piiHeader = document.createElement('div');
+      piiHeader.innerHTML = '<p class="hint" style="margin:16px 0 4px;"><strong style="color:var(--text);">PII detections</strong></p>';
+      body.appendChild(piiHeader);
+
+      const piiToggle = document.createElement('div');
+      piiToggle.className = 'checks';
+      piiToggle.innerHTML = `<label><input type="checkbox" class="check-files" value="pii" checked> PII detection (enable/disable all PII checks)</label>`;
+      body.appendChild(piiToggle);
+
+      if (piiTypes.length > 0) {
+        const piiWrap = document.createElement('div');
+        piiWrap.innerHTML = '<p class="hint" style="margin-top:8px;">Search for specific PII types only (all selected by default):</p>';
+        const grid = document.createElement('div');
+        grid.className = 'pii-grid';
+        for (const p of piiTypes) {
+          const label = document.createElement('label');
+          label.innerHTML = `<input type="checkbox" class="pii-type" value="${p.id}" checked> ${escapeHtml(p.label)}`;
+          grid.appendChild(label);
+        }
+        piiWrap.appendChild(grid);
+        body.appendChild(piiWrap);
+      }
+
+      // --- Custom search (name/term) - nested inside Storage/Files per request ---
+      const customHeader = document.createElement('div');
+      customHeader.innerHTML = '<p class="hint" style="margin:16px 0 4px;"><strong style="color:var(--text);">Custom search</strong> - find a specific person or exact text</p>';
+      body.appendChild(customHeader);
+      body.appendChild(buildCustomSearchUI());
+    }
+
+    details.appendChild(body);
     container.appendChild(details);
   }
 }
 
+function buildCustomSearchUI() {
+  const wrap = document.createElement('div');
+  wrap.innerHTML = `
+    <p class="hint">Enter any combination of name parts - searches for realistic real-world formats (Mike Brown, Mike H. Brown, Brown, Mike, etc.), not just the exact spelling typed here.</p>
+    <div class="inline-row">
+      <div class="field"><label>First name</label><input type="text" id="nameFirst" placeholder="Mike"></div>
+      <div class="field"><label>Middle name</label><input type="text" id="nameMiddle" placeholder="Hawk"></div>
+      <div class="field"><label>Last name</label><input type="text" id="nameLast" placeholder="Brown"></div>
+      <button type="button" class="secondary" onclick="addNameQuery()">Add name</button>
+    </div>
+    <div id="nameQueryList"></div>
+
+    <p class="hint" style="margin-top:14px;">Or search for an exact string or regular expression:</p>
+    <div class="inline-row">
+      <div class="field" style="flex:1;"><label>Text or regex</label><input type="text" id="termText" placeholder="OperationPhoenix" style="min-width:220px;"></div>
+      <div class="field">
+        <label style="display:flex; align-items:center; gap:5px; color:var(--text);">
+          <input type="checkbox" id="termIsRegex"> Treat as regex
+        </label>
+      </div>
+      <div class="field">
+        <label style="display:flex; align-items:center; gap:5px; color:var(--text);">
+          <input type="checkbox" id="termCaseSensitive"> Case-sensitive
+        </label>
+      </div>
+      <button type="button" class="secondary" onclick="addTermQuery()">Add term</button>
+    </div>
+    <div id="termQueryList"></div>
+  `;
+  return wrap;
+}
+
 function toggleCatBlock(cat) {
   const enabled = document.querySelector('.cat-toggle[value="' + cat + '"]').checked;
-  const block = document.getElementById('catblock-' + cat);
-  if (block) block.style.display = enabled ? '' : 'none';
+  const body = document.getElementById('catbody-' + cat);
+  if (body) body.style.opacity = enabled ? '1' : '0.4';
 }
 
 function collectChecks() {
@@ -483,6 +672,9 @@ async function runScan() {
   const status = document.getElementById('status');
   const btn = document.getElementById('scanBtn');
 
+  const categories = Array.from(document.querySelectorAll('.cat-toggle:checked')).map(c => c.value);
+  if (categories.length === 0) { status.textContent = 'Pick at least one category.'; status.className = 'status err'; return; }
+
   let targets = selectedTargets;
   const displayedSelection = selectedTargets.length > 1
     ? selectedTargets.length + ' files selected: ' + selectedTargets.join(', ')
@@ -491,14 +683,11 @@ async function runScan() {
     targets = typedTarget ? [typedTarget] : [];
   }
 
-  if (targets.length === 0) {
+  if (categories.includes('files') && targets.length === 0) {
     status.textContent = 'Enter a target path, or use Browse... to pick one.';
     status.className = 'status err';
     return;
   }
-
-  const categories = Array.from(document.querySelectorAll('.cat-toggle:checked')).map(c => c.value);
-  if (categories.length === 0) { status.textContent = 'Pick at least one category.'; status.className = 'status err'; return; }
 
   btn.disabled = true;
   status.className = 'status';
@@ -588,145 +777,288 @@ function renderFindings() {
 }
 
 // ============================ CIPHER TAB =============================
-function updateKeyVisibility(prefix) {
-  const method = document.getElementById(prefix + 'Method').value;
-  const field = document.getElementById(prefix + 'KeyField');
-  field.style.display = (method === 'caesar' || method === 'vigenere') ? '' : 'none';
+const keyedMethods = new Set(['caesar', 'vigenere', 'xor', 'railfence', 'scytale', 'columnar', 'playfair', 'keyboard', 'beaufort', 'autokey', 'two_square', 'four_square', 'route_cipher', 'rc4', 'lfsr', 'one_time_pad', 'chacha20', 'salsa20', 'enigma', 'des', 'spn', 'tea']);
+
+// Methods that take a variant/layout selector (populated from the server).
+function refreshVariant(selectEl, method) {
+  selectEl.innerHTML = '<option value="">Default</option>';
+  postJSON('/api/cipher/variants', {method}).then(d => {
+    if (d && Array.isArray(d.variants) && d.variants.length > 0) {
+      for (const v of d.variants) {
+        const opt = document.createElement('option');
+        opt.value = v;
+        opt.textContent = v;
+        selectEl.appendChild(opt);
+      }
+    }
+  }).catch(() => {});
 }
-updateKeyVisibility('decode');
-updateKeyVisibility('encode');
+
+function updateADKeyVisibility() {
+  const m = document.getElementById('adMethod').value;
+  document.getElementById('adKeyField').style.display = keyedMethods.has(m) ? '' : 'none';
+  const vf = document.getElementById('adVariantField');
+  const vs = document.getElementById('adVariant');
+  const anyVariants = ['keyboard', 'lfsr', 'braille', 'wingdings', 'arrow', 'simple_symbols', 'symbol_lookalikes', 'vowel_to_number', 'emoticons'].includes(m);
+  vf.style.display = anyVariants ? '' : 'none';
+  if (anyVariants && !vs.dataset.loadedFor) refreshVariant(vs, m);
+  if (!anyVariants) vs.innerHTML = '<option value="">Default</option>';
+  vs.dataset.loadedFor = anyVariants ? m : '';
+}
+function updateEncodeKeyVisibility() {
+  const m = document.getElementById('encodeMethod').value;
+  document.getElementById('encodeKeyField').style.display = keyedMethods.has(m) ? '' : 'none';
+  const vf = document.getElementById('encodeVariantField');
+  const vs = document.getElementById('encodeVariant');
+  const anyVariants = ['keyboard', 'lfsr', 'braille', 'wingdings', 'arrow', 'simple_symbols', 'symbol_lookalikes', 'vowel_to_number', 'emoticons'].includes(m);
+  vf.style.display = anyVariants ? '' : 'none';
+  if (anyVariants && !vs.dataset.loadedFor) refreshVariant(vs, m);
+  if (!anyVariants) vs.innerHTML = '<option value="">Default</option>';
+  vs.dataset.loadedFor = anyVariants ? m : '';
+}
+updateADKeyVisibility();
+updateEncodeKeyVisibility();
+
+function busy(btn, label) {
+  btn.dataset.restore = btn.innerHTML;
+  btn.disabled = true;
+  btn.innerHTML = label;
+}
+function idle(btn) {
+  btn.disabled = false;
+  if (btn.dataset.restore) { btn.innerHTML = btn.dataset.restore; }
+  delete btn.dataset.restore;
+}
 
 async function postJSON(url, body) {
   const resp = await fetch(url, {method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(body)});
   return resp.json();
 }
 
-async function cipherAnalyze() {
-  const text = document.getElementById('analyzeInput').value;
-  const out = document.getElementById('analyzeResult');
+// --- Merged Analyze & Decode ---
+async function analyzeDecode() {
+  const text  = document.getElementById('adInput').value;
+  const method = document.getElementById('adMethod').value;
+  const key    = document.getElementById('adKey').value;
+  const lang   = document.getElementById('adLang').value;
+  const out    = document.getElementById('adResult');
+  const btn    = document.getElementById('adBtn');
   if (!text.trim()) { out.innerHTML = '<p class="hint">Enter some text first.</p>'; return; }
-  out.innerHTML = '<p class="hint">Analyzing...</p>';
+  busy(btn, 'Working...'); out.innerHTML = '<p class="hint">Analyzing & decoding...</p>';
 
-  const data = await postJSON('/api/cipher/analyze', {text});
-  let html = '<div class="resultbox">';
+  try {
+    if (method === '') {
+      const data = await postJSON('/api/cipher/analyze', {text, lang});
+      out.innerHTML = renderAnalyzeResult(data);
+    } else {
+      const variant = document.getElementById('adVariant').value;
+      const data = await postJSON('/api/cipher/decode', {method, text, key, variant});
+      out.innerHTML = renderDecodeResult(data);
+    }
+  } catch (e) {
+    out.innerHTML = `<div class="status err">Request failed: ${escapeHtml(e.message)}</div>`;
+  } finally { idle(btn); }
+}
 
+function renderAnalyzeResult(data) {
+  let h = '';
   if (data.input_language) {
-    html += `<div class="row"><span class="label">Already reads as</span><span>${data.input_language.language_name} (confidence ${(data.input_language.confidence*100).toFixed(0)}%)</span></div>`;
-    html += '<p class="hint">This text already matches a known language - probably not ciphered.</p>';
+    h += `<div class="row"><span class="label">Already reads as</span><span>${escapeHtml(data.input_language.language_name)} (confidence ${(data.input_language.confidence*100).toFixed(0)}%)</span></div>`;
+    h += '<p class="hint">This text already matches a known language &mdash; probably not ciphered.</p>';
   } else if (data.classical_crack) {
     const c = data.classical_crack;
-    html += `<div class="row"><span class="label">Likely cipher</span><span><strong>${c.method}</strong>${c.key ? ' (key: ' + escapeHtml(c.key) + ')' : ''}</span></div>`;
-    html += `<div class="row"><span class="label">Decoded language</span><span>${c.language} (confidence ${(c.confidence*100).toFixed(0)}%)</span></div>`;
-    html += `<div class="label">Most likely meaning:</div><pre>${escapeHtml(c.plaintext)}</pre>`;
+    h += `<div class="row"><span class="label">Likely cipher</span><span><strong>${escapeHtml(c.method)}</strong>${c.key ? ' (key: ' + escapeHtml(c.key) + ')' : ''}</span></div>`;
+    h += `<div class="row"><span class="label">Decoded language</span><span>${escapeHtml(c.language)} (confidence ${(c.confidence*100).toFixed(0)}%)</span></div>`;
+    h += `<div class="label">Most likely meaning:</div><pre>${escapeHtml(c.plaintext)}</pre>`;
   } else {
-    html += '<p class="hint">Doesn\'t match a known language, and automatic cracking (Caesar/ROT13/Atbash/Vigenère) found no confident decode. Could be a different cipher, an unsupported language, or random data.</p>';
+    h += '<p class="hint">Doesn\'t match a known language, and automatic cracking (Caesar/ROT13/Atbash/Vigen&#232;re) found no confident decode. Could be a different cipher, an unsupported language, or random data.</p>';
   }
-
   if (data.encodings && data.encodings.length > 0) {
-    html += '<div class="label" style="margin-top:10px;">Encoded substrings found:</div>';
+    h += '<div class="label" style="margin-top:10px;">Encoded substrings found:</div>';
     for (const e of data.encodings) {
-      html += `<div class="candidate-row"><span>${e.type}${e.looks_meaningful ? ' (decoded to readable text)' : ''}</span><span>${escapeHtml(e.decoded || e.sample)}</span></div>`;
+      h += `<div class="candidate-row"><span>${escapeHtml(e.type)}${e.looks_meaningful ? ' (decoded to readable text)' : ''}</span><span>${escapeHtml(e.decoded || e.sample)}</span></div>`;
     }
   }
-  html += '</div>';
-  out.innerHTML = html;
+  if (data.input_pii && data.input_pii.length > 0) {
+    h += '<div class="label" style="margin-top:10px;">PII detected in input:</div>';
+    for (const m of data.input_pii) {
+      h += `<div class="candidate-row"><span>${escapeHtml(m.label)}</span><span>${escapeHtml(m.value)}</span></div>`;
+    }
+  }
+  if (data.translation) {
+    h += '<div class="label" style="margin-top:10px;">Rough dictionary gloss:</div>' + glossHtml(data.translation);
+  }
+  return h || '<p class="hint">Nothing notable found.</p>';
 }
 
-async function cipherDecode() {
-  const method = document.getElementById('decodeMethod').value;
-  const text = document.getElementById('decodeInput').value;
-  const key = document.getElementById('decodeKey').value;
-  const out = document.getElementById('decodeResult');
-  if (!text.trim()) { out.innerHTML = '<p class="hint">Enter ciphertext first.</p>'; return; }
-  out.innerHTML = '<p class="hint">Decoding...</p>';
-
-  const data = await postJSON('/api/cipher/decode', {method, text, key});
-  let html = '<div class="resultbox">';
+function renderDecodeResult(data) {
+  let h = '';
   if (data.error) {
-    html += `<div class="status err">${escapeHtml(data.error)}</div>`;
+    h += `<div class="status err">${escapeHtml(data.error)}</div>`;
   } else if (data.success) {
-    if (data.key_used) html += `<div class="row"><span class="label">Key used</span><span>${escapeHtml(data.key_used)}</span></div>`;
-    if (data.note) html += `<p class="hint">${escapeHtml(data.note)}</p>`;
-    html += `<div class="label">Plaintext:</div><pre>${escapeHtml(data.plaintext)}</pre>`;
+    if (data.key_used) h += `<div class="row"><span class="label">Key used</span><span>${escapeHtml(data.key_used)}</span></div>`;
+    if (data.note) h += `<p class="hint">${escapeHtml(data.note)}</p>`;
+    h += `<div class="label">Plaintext:</div><pre>${escapeHtml(data.plaintext)}</pre>`;
+    if (data.pii && data.pii.length > 0) {
+      h += '<div class="label" style="margin-top:10px;">PII detected in plaintext:</div>';
+      for (const m of data.pii) {
+        h += `<div class="candidate-row"><span>${escapeHtml(m.label)}</span><span>${escapeHtml(m.value)}</span></div>`;
+      }
+    }
   } else {
-    if (data.note) html += `<p class="hint">${escapeHtml(data.note)}</p>`;
+    if (data.note) h += `<p class="hint">${escapeHtml(data.note)}</p>`;
   }
   if (data.candidates && data.candidates.length > 0) {
-    html += '<div class="label" style="margin-top:10px;">All 25 Caesar shifts (best-scoring first):</div>';
+    h += '<div class="label" style="margin-top:10px;">All 25 Caesar shifts (best-scoring first):</div>';
     data.candidates.slice(0, 25).forEach((c, i) => {
-      html += `<div class="candidate-row${i===0 ? ' best' : ''}"><span>shift ${c.shift}${c.language ? ' (' + c.language + ')' : ''}</span><span>${escapeHtml(c.plaintext.slice(0,60))}</span></div>`;
+      h += `<div class="candidate-row${i===0 ? ' best' : ''}"><span>shift ${c.shift}${c.language ? ' (' + escapeHtml(c.language) + ')' : ''}</span><span>${escapeHtml(c.plaintext.slice(0,60))}</span></div>`;
     });
   }
-  html += '</div>';
-  out.innerHTML = html;
+  return h || '<p class="hint">No result.</p>';
 }
 
+// --- Encode ---
 async function cipherEncode() {
   const method = document.getElementById('encodeMethod').value;
-  const text = document.getElementById('encodeInput').value;
-  const key = document.getElementById('encodeKey').value;
-  const out = document.getElementById('encodeResult');
+  const text   = document.getElementById('encodeInput').value;
+  const key    = document.getElementById('encodeKey').value;
+  const out    = document.getElementById('encodeResult');
+  const btn    = document.getElementById('encodeBtn');
   if (!text.trim()) { out.innerHTML = '<p class="hint">Enter plaintext first.</p>'; return; }
-  out.innerHTML = '<p class="hint">Encoding...</p>';
+  busy(btn, 'Working...'); out.innerHTML = '<p class="hint">Encoding...</p>';
 
-  const data = await postJSON('/api/cipher/encode', {method, text, key});
-  let html = '<div class="resultbox">';
-  if (data.error) {
-    html += `<div class="status err">${escapeHtml(data.error)}</div>`;
-  } else {
-    html += `<div class="label">Encoded:</div><pre>${escapeHtml(data.encoded)}</pre>`;
-  }
-  html += '</div>';
-  out.innerHTML = html;
+  try {
+    const variant = document.getElementById('encodeVariant').value;
+    const data = await postJSON('/api/cipher/encode', {method, text, key, variant});
+    if (data.error) {
+      out.innerHTML = `<div class="status err">${escapeHtml(data.error)}</div>`;
+    } else {
+      out.innerHTML = `<div class="label">Encoded:</div><pre>${escapeHtml(data.encoded)}</pre>`;
+    }
+  } catch (e) {
+    out.innerHTML = `<div class="status err">Request failed: ${escapeHtml(e.message)}</div>`;
+  } finally { idle(btn); }
 }
+
+// ============================ TRANSLATE (Cipher tab) ==================
+async function loadTranslateLanguages() {
+  const select = document.getElementById('translateLang');
+  const adLang = document.getElementById('adLang');
+  try {
+    const langs = await fetch('/api/translate/languages').then(r => r.json());
+    if (!langs || langs.length === 0) {
+      select.innerHTML = '<option value="">No dictionary data loaded</option>';
+      adLang.innerHTML = '<option value="">No dictionary data loaded</option>';
+      return;
+    }
+    const opts = langs.map(l => `<option value="${l.code}">${escapeHtml(l.name)}</option>`).join('');
+    select.innerHTML = opts;
+    adLang.innerHTML = '<option value="">Auto (dictionary)</option>' + opts;
+  } catch (e) {
+    select.innerHTML = '<option value="">Could not load languages</option>';
+    adLang.innerHTML = '<option value="">Could not load languages</option>';
+  }
+}
+
+async function runTranslate() {
+  const lang = document.getElementById('translateLang').value;
+  const text = document.getElementById('translateInput').value;
+  const out  = document.getElementById('translateResult');
+  const btn  = document.getElementById('translateBtn');
+  if (!lang) { out.innerHTML = '<p class="hint">No language selected.</p>'; return; }
+  if (!text.trim()) { out.innerHTML = '<p class="hint">Enter some text first.</p>'; return; }
+  busy(btn, 'Translating...'); out.innerHTML = '<p class="hint">Translating...</p>';
+
+  try {
+    const data = await postJSON('/api/translate', {text, lang});
+    if (data.error) { out.innerHTML = `<div class="status err">${escapeHtml(data.error)}</div>`; return; }
+    out.innerHTML = glossHtml(data);
+  } catch (e) {
+    out.innerHTML = `<div class="status err">Request failed: ${escapeHtml(e.message)}</div>`;
+  } finally { idle(btn); }
+}
+
+// glossHtml renders a dictionary-gloss result (shared by the Translate
+// panel and the merged Analyze & Decode result).
+function glossHtml(data) {
+  let h = '';
+  h += `<div class="row"><span class="label">Language</span><span>${escapeHtml(data.language_name)}</span></div>`;
+  h += `<div class="row"><span class="label">Dictionary coverage</span><span>${Math.round(data.coverage_pct*100)}% of tokens found</span></div>`;
+  h += `<div class="label" style="margin-top:8px;">Rough translation (literal, word order preserved &mdash; not fluent):</div>`;
+  h += `<pre>${escapeHtml(data.rough_translation || '(no tokens matched)')}</pre>`;
+  h += `<div class="label" style="margin-top:10px;">Word-by-word breakdown:</div>`;
+  for (const t of (data.tokens || [])) {
+    const meta = [t.pinyin, t.readings].filter(Boolean).join(' / ');
+    h += `<div class="candidate-row" style="${t.found ? '' : 'opacity:0.5;'}">` +
+      `<span><strong>${escapeHtml(t.text)}</strong>${meta ? ' (' + escapeHtml(meta) + ')' : ''}</span>` +
+      `<span>${t.found ? escapeHtml((t.definitions||[]).join('; ')) : 'not found in dictionary'}</span></div>`;
+  }
+  return h;
+}
+
+loadTranslateLanguages();
 
 // ============================ TOOLS TAB ==============================
 async function hashFile() {
   const path = document.getElementById('hashPath').value.trim();
-  const out = document.getElementById('hashResult');
+  const out  = document.getElementById('hashResult');
+  const btn  = document.getElementById('hashBtn');
   if (!path) { out.innerHTML = '<p class="hint">Enter a file path first.</p>'; return; }
-  out.innerHTML = '<p class="hint">Hashing...</p>';
+  busy(btn, 'Hashing...'); out.innerHTML = '<p class="hint">Hashing...</p>';
 
-  const data = await postJSON('/api/tools/hash', {path});
-  if (data.error) { out.innerHTML = `<div class="status err">${escapeHtml(data.error)}</div>`; return; }
-  out.innerHTML = `<div class="resultbox">
-    <div class="row"><span class="label">Size</span><span>${data.size_bytes} bytes</span></div>
-    <div class="row"><span class="label">MD5</span><span>${data.md5}</span></div>
-    <div class="row"><span class="label">SHA-1</span><span>${data.sha1}</span></div>
-    <div class="row"><span class="label">SHA-256</span><span>${data.sha256}</span></div>
-    <div class="row"><span class="label">SHA-512</span><span style="word-break:break-all; max-width:60%;">${data.sha512}</span></div>
-  </div>`;
+  try {
+    const data = await postJSON('/api/tools/hash', {path});
+    if (data.error) { out.innerHTML = `<div class="status err">${escapeHtml(data.error)}</div>`; return; }
+    out.innerHTML =
+      `<div class="row"><span class="label">Size</span><span>${data.size_bytes} bytes</span></div>` +
+      `<div class="row"><span class="label">MD5</span><span style="word-break:break-all;">${data.md5}</span></div>` +
+      `<div class="row"><span class="label">SHA-1</span><span style="word-break:break-all;">${data.sha1}</span></div>` +
+      `<div class="row"><span class="label">SHA-256</span><span style="word-break:break-all;">${data.sha256}</span></div>` +
+      `<div class="row"><span class="label">SHA-512</span><span style="word-break:break-all; max-width:55%;">${data.sha512}</span></div>`;
+  } catch (e) {
+    out.innerHTML = `<div class="status err">Request failed: ${escapeHtml(e.message)}</div>`;
+  } finally { idle(btn); }
 }
 
 async function identifyHash() {
   const hash = document.getElementById('hashGuessInput').value.trim();
-  const out = document.getElementById('identifyResult');
+  const out  = document.getElementById('identifyResult');
+  const btn  = document.getElementById('identifyBtn');
   if (!hash) { out.innerHTML = '<p class="hint">Enter a hash string first.</p>'; return; }
+  busy(btn, 'Identifying...'); out.innerHTML = '<p class="hint">Identifying...</p>';
 
-  const data = await postJSON('/api/tools/identify-hash', {hash});
-  if (!data.likely_algorithms || data.likely_algorithms.length === 0) {
-    out.innerHTML = '<div class="resultbox">No known hash format matched this string\'s length/pattern.</div>';
-    return;
-  }
-  out.innerHTML = `<div class="resultbox"><div class="label">Likely:</div><pre>${data.likely_algorithms.join(', ')}</pre></div>`;
+  try {
+    const data = await postJSON('/api/tools/identify-hash', {hash});
+    if (!data.likely_algorithms || data.likely_algorithms.length === 0) {
+      out.innerHTML = '<p class="hint">No known hash format matched this string\'s length/pattern.</p>';
+      return;
+    }
+    out.innerHTML = `<div class="label">Likely:</div><pre>${escapeHtml(data.likely_algorithms.join(', '))}</pre>`;
+  } catch (e) {
+    out.innerHTML = `<div class="status err">Request failed: ${escapeHtml(e.message)}</div>`;
+  } finally { idle(btn); }
 }
 
 async function jwtDecode() {
   const token = document.getElementById('jwtInput').value.trim();
-  const out = document.getElementById('jwtResult');
+  const out   = document.getElementById('jwtResult');
+  const btn   = document.getElementById('jwtBtn');
   if (!token) { out.innerHTML = '<p class="hint">Paste a JWT first.</p>'; return; }
+  busy(btn, 'Decoding...'); out.innerHTML = '<p class="hint">Decoding...</p>';
 
-  const data = await postJSON('/api/tools/jwt-decode', {token});
-  if (data.error) { out.innerHTML = `<div class="status err">${escapeHtml(data.error)}</div>`; return; }
-  let html = '<div class="resultbox">';
-  html += `<div class="label">Header:</div><pre>${escapeHtml(JSON.stringify(data.header, null, 2))}</pre>`;
-  html += `<div class="label" style="margin-top:8px;">Payload:</div><pre>${escapeHtml(JSON.stringify(data.payload, null, 2))}</pre>`;
-  if (data.warnings && data.warnings.length > 0) {
-    for (const w of data.warnings) html += `<div class="warn-line">&#9888; ${escapeHtml(w)}</div>`;
-  }
-  html += '<p class="hint" style="margin-top:8px;">Signature was not verified - this tool never has the signing secret.</p>';
-  html += '</div>';
-  out.innerHTML = html;
+  try {
+    const data = await postJSON('/api/tools/jwt-decode', {token});
+    if (data.error) { out.innerHTML = `<div class="status err">${escapeHtml(data.error)}</div>`; return; }
+    let h = `<div class="label">Header:</div><pre>${escapeHtml(JSON.stringify(data.header, null, 2))}</pre>`;
+    h += `<div class="label" style="margin-top:8px;">Payload:</div><pre>${escapeHtml(JSON.stringify(data.payload, null, 2))}</pre>`;
+    if (data.warnings && data.warnings.length > 0) {
+      for (const w of data.warnings) h += `<div class="warn-line">&#9888; ${escapeHtml(w)}</div>`;
+    }
+    h += '<p class="hint" style="margin-top:8px;">Signature was not verified &mdash; this tool never has the signing secret.</p>';
+    out.innerHTML = h;
+  } catch (e) {
+    out.innerHTML = `<div class="status err">Request failed: ${escapeHtml(e.message)}</div>`;
+  } finally { idle(btn); }
 }
 
 // ============================== INIT ==================================

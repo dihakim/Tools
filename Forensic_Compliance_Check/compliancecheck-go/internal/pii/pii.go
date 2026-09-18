@@ -31,6 +31,8 @@ type rawRule struct {
 	Label            string              `json:"label"`
 	Pattern          string              `json:"pattern"`
 	Severity         string              `json:"severity"`
+	Importance       int                 `json:"importance_score"` // 0-100, finer-grained than severity, drives decode-confidence weighting
+	Description      string              `json:"description"`
 	Checksum         string              `json:"checksum"`
 	MinDigits        int                 `json:"min_digits"`
 	MaxDigits        int                 `json:"max_digits"`
@@ -47,6 +49,8 @@ type Match struct {
 	Label            string `json:"label"`
 	Severity         string `json:"severity"`      // may be downgraded/upgraded from the rule default
 	BaseSeverity     string `json:"base_severity"`
+	Importance       int    `json:"importance_score"`
+	Description     string `json:"description,omitempty"`
 	Value            string `json:"value"`          // redacted before it ever leaves this package
 	ChecksumPassed   *bool  `json:"checksum_passed,omitempty"`
 	ContextMatched   string `json:"context_matched,omitempty"` // which language's keyword hit, if any
@@ -114,6 +118,8 @@ func (d *Detector) Scan(text string) []Match {
 				Label:        rule.Label,
 				BaseSeverity: rule.Severity,
 				Severity:     rule.Severity,
+				Importance:   rule.Importance,
+				Description:  rule.Description,
 				Value:        redact(rule.ID, raw),
 				Position:     loc[0],
 			}
@@ -138,6 +144,56 @@ func (d *Detector) Scan(text string) []Match {
 		}
 	}
 	return out
+}
+
+// DecodeTextScore returns a small confidence boost for text that contains
+// PII-shaped structure: emails, phone numbers, credit cards, IDs, and
+// recognized first+last name pairs. It exists for the classical-cipher
+// decoders, where a candidate decode containing a real name/email/phone is
+// strong evidence the text is actual human content rather than shifted
+// noise.
+//
+// It is deliberately a SECONDARY signal, never a primary one: PII presence
+// must not outweigh plain-language evidence, so the return is capped modestly
+// (0.15 max) and callers apply it only to candidates that already passed
+// language-based validation. Scoring uses rules.json's importance_score
+// (finer-grained than severity, sourced from the reference PII category
+// metadata), with small multipliers for context-keyword hits and
+// checksum-passed critical values, plus a fixed weight per recognized
+// name pair. Returns 0 for a nil detector or empty input.
+func (d *Detector) DecodeTextScore(text string) float64 {
+	if d == nil || text == "" {
+		return 0
+	}
+	// Repeated matches of the same rule count once - ten phone numbers in a
+	// document are one signal, not ten. Distinct PII types are what matter.
+	seen := map[string]bool{}
+	score := 0.0
+	for _, m := range d.Scan(text) {
+		if seen[m.RuleID] {
+			continue
+		}
+		seen[m.RuleID] = true
+		weight := float64(m.Importance)
+		if weight == 0 {
+			weight = 40 // rules without explicit importance default to a modest weight
+		}
+		if m.ContextMatched != "" {
+			weight *= 1.3 // "card xxxx" is far more likely a card than a bare digit run
+		}
+		if m.ChecksumPassed != nil && *m.ChecksumPassed && m.BaseSeverity == "critical" {
+			weight *= 1.2 // a Luhn-passing 16-digit run is strong evidence of a real card
+		}
+		score += weight
+	}
+	score += float64(len(DetectNames(text))) * 60
+
+	if score > 150 {
+		score = 150
+	}
+	// A single email or name pair lands around 0.05-0.08; a PII-dense
+	// paragraph tops out near 0.15. Never enough to override words alone.
+	return score / 1000.0
 }
 
 const contextWindow = 40

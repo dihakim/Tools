@@ -1,317 +1,1041 @@
-{
-  "signatures": [
-    {
-      "type": "pdf",
-      "extensions": [
-        "pdf"
-      ],
-      "magic_hex": [
-        "25504446"
-      ]
-    },
-    {
-      "type": "png",
-      "extensions": [
-        "png"
-      ],
-      "magic_hex": [
-        "89504e470d0a1a0a"
-      ]
-    },
-    {
-      "type": "jpg",
-      "extensions": [
-        "jpg",
-        "jpeg"
-      ],
-      "magic_hex": [
-        "ffd8ff"
-      ]
-    },
-    {
-      "type": "gif",
-      "extensions": [
-        "gif"
-      ],
-      "magic_hex": [
-        "474946383761",
-        "474946383961"
-      ]
-    },
-    {
-      "type": "zip_family",
-      "extensions": [
-        "zip",
-        "docx",
-        "xlsx",
-        "pptx",
-        "apk",
-        "jar"
-      ],
-      "magic_hex": [
-        "504b0304",
-        "504b0506",
-        "504b0708"
-      ]
-    },
-    {
-      "type": "elf",
-      "extensions": [
-        "elf",
-        "so",
-        "bin"
-      ],
-      "magic_hex": [
-        "7f454c46"
-      ]
-    },
-    {
-      "type": "pe_exe",
-      "extensions": [
-        "exe",
-        "dll",
-        "msi"
-      ],
-      "magic_hex": [
-        "4d5a"
-      ]
-    },
-    {
-      "type": "macho",
-      "extensions": [
-        "macho",
-        "dylib"
-      ],
-      "magic_hex": [
-        "cffaedfe",
-        "feedface",
-        "cafebabe"
-      ]
-    },
-    {
-      "type": "gzip",
-      "extensions": [
-        "gz",
-        "gzip"
-      ],
-      "magic_hex": [
-        "1f8b"
-      ]
-    },
-    {
-      "type": "rar",
-      "extensions": [
-        "rar"
-      ],
-      "magic_hex": [
-        "526172211a0700"
-      ]
-    },
-    {
-      "type": "sqlite",
-      "extensions": [
-        "db",
-        "sqlite",
-        "sqlite3"
-      ],
-      "magic_hex": [
-        "53514c69746520666f726d6174203300"
-      ]
-    },
-    {
-      "type": "mp3",
-      "extensions": [
-        "mp3"
-      ],
-      "magic_hex": [
-        "494433",
-        "fffb"
-      ]
-    },
-    {
-      "type": "mp4",
-      "extensions": [
-        "mp4",
-        "mov",
-        "m4a"
-      ],
-      "magic_hex": [
-        "66747970"
-      ],
-      "offset": 4
-    },
-    {
-      "type": "bmp",
-      "extensions": [
-        "bmp"
-      ],
-      "magic_hex": [
-        "424d"
-      ]
-    },
-    {
-      "type": "rtf",
-      "extensions": [
-        "rtf"
-      ],
-      "magic_hex": [
-        "7b5c72746631"
-      ]
-    },
-    {
-      "type": "ole_doc",
-      "extensions": [
-        "doc",
-        "xls",
-        "ppt",
-        "msi"
-      ],
-      "magic_hex": [
-        "d0cf11e0a1b11ae1"
-      ]
-    },
-    {
-      "type": "7zip",
-      "extensions": [
-        "7z"
-      ],
-      "magic_hex": [
-        "377abcaf271c"
-      ]
-    },
-    {
-      "type": "rar5",
-      "extensions": [
-        "rar"
-      ],
-      "magic_hex": [
-        "526172211a0701"
-      ]
-    },
-    {
-      "type": "tar",
-      "extensions": [
-        "tar"
-      ],
-      "magic_hex": [
-        "7573746172"
-      ],
-      "offset": 257
-    },
-    {
-      "type": "wav",
-      "extensions": [
-        "wav"
-      ],
-      "magic_hex": [
-        "52494646"
-      ],
-      "offset": 0
-    },
-    {
-      "type": "avi",
-      "extensions": [
-        "avi"
-      ],
-      "magic_hex": [
-        "52494646"
-      ],
-      "offset": 0
-    },
-    {
-      "type": "flac",
-      "extensions": [
-        "flac"
-      ],
-      "magic_hex": [
-        "664c6143"
-      ]
-    },
-    {
-      "type": "ico",
-      "extensions": [
-        "ico"
-      ],
-      "magic_hex": [
-        "00000100"
-      ]
-    },
-    {
-      "type": "ttf",
-      "extensions": [
-        "ttf"
-      ],
-      "magic_hex": [
-        "0001000000"
-      ]
-    },
-    {
-      "type": "otf",
-      "extensions": [
-        "otf"
-      ],
-      "magic_hex": [
-        "4f54544f"
-      ]
-    },
-    {
-      "type": "java_class",
-      "extensions": [
-        "class"
-      ],
-      "magic_hex": [
-        "cafebabe"
-      ]
-    },
-    {
-      "type": "webp",
-      "extensions": [
-        "webp"
-      ],
-      "magic_hex": [
-        "57454250"
-      ],
-      "offset": 8
-    },
-    {
-      "type": "pcap",
-      "extensions": [
-        "pcap"
-      ],
-      "magic_hex": [
-        "a1b2c3d4",
-        "d4c3b2a1"
-      ]
-    },
-    {
-      "type": "sqlite_wal",
-      "extensions": [
-        "wal"
-      ],
-      "magic_hex": [
-        "377f0682"
-      ]
-    },
-    {
-      "type": "tiff",
-      "extensions": [
-        "tif",
-        "tiff"
-      ],
-      "magic_hex": [
-        "49492a00",
-        "4d4d002a"
-      ]
-    },
-    {
-      "type": "webm_mkv",
-      "extensions": [
-        "webm",
-        "mkv"
-      ],
-      "magic_hex": [
-        "1a45dfa3"
-      ]
-    }
-  ]
-}
+[
+  {
+    "id": 1,
+    "extension": "exe",
+    "description": "DOS MZ executable and PE format",
+    "reliable": true,
+    "checkpoints": [
+      {
+        "offset": 0,
+        "hex": "4D5A"
+      }
+    ]
+  },
+  {
+    "id": 2,
+    "extension": "exe",
+    "description": "DOS ZM executable (rare)",
+    "reliable": true,
+    "checkpoints": [
+      {
+        "offset": 0,
+        "hex": "5A4D"
+      }
+    ]
+  },
+  {
+    "id": 3,
+    "extension": "msi",
+    "description": "Microsoft Compound File Binary Format",
+    "reliable": true,
+    "checkpoints": [
+      {
+        "offset": 0,
+        "hex": "D0CF11E0A1B11AE1"
+      }
+    ]
+  },
+  {
+    "id": 4,
+    "extension": "dll",
+    "description": "DOS MZ executable format for DLLs",
+    "reliable": true,
+    "checkpoints": [
+      {
+        "offset": 0,
+        "hex": "4D5A"
+      }
+    ]
+  },
+  {
+    "id": 5,
+    "extension": "sys",
+    "description": "DOS MZ executable format for drivers",
+    "reliable": true,
+    "checkpoints": [
+      {
+        "offset": 0,
+        "hex": "4D5A"
+      }
+    ]
+  },
+  {
+    "id": 6,
+    "extension": "bat",
+    "description": "Batch file starting with \"@echo off\"",
+    "reliable": false,
+    "checkpoints": [
+      {
+        "offset": 0,
+        "hex": "406563686F206F6666"
+      }
+    ]
+  },
+  {
+    "id": 7,
+    "extension": "cmd",
+    "description": "Command file starting with \"@echo off\"",
+    "reliable": false,
+    "checkpoints": [
+      {
+        "offset": 0,
+        "hex": "406563686F206F6666"
+      }
+    ]
+  },
+  {
+    "id": 8,
+    "extension": "ps1",
+    "description": "PowerShell shebang",
+    "reliable": false,
+    "checkpoints": [
+      {
+        "offset": 0,
+        "hex": "2321"
+      }
+    ]
+  },
+  {
+    "id": 9,
+    "extension": "sh",
+    "description": "Shell script shebang",
+    "reliable": false,
+    "checkpoints": [
+      {
+        "offset": 0,
+        "hex": "2321"
+      }
+    ]
+  },
+  {
+    "id": 10,
+    "extension": "py",
+    "description": "Python shebang",
+    "reliable": false,
+    "checkpoints": [
+      {
+        "offset": 0,
+        "hex": "2321"
+      }
+    ]
+  },
+  {
+    "id": 11,
+    "extension": "py",
+    "description": "Python UTF-8 BOM",
+    "reliable": false,
+    "checkpoints": [
+      {
+        "offset": 0,
+        "hex": "EFBBBF"
+      }
+    ]
+  },
+  {
+    "id": 12,
+    "extension": "rb",
+    "description": "Ruby shebang",
+    "reliable": false,
+    "checkpoints": [
+      {
+        "offset": 0,
+        "hex": "2321"
+      }
+    ]
+  },
+  {
+    "id": 13,
+    "extension": "php",
+    "description": "PHP opening tag",
+    "reliable": false,
+    "checkpoints": [
+      {
+        "offset": 0,
+        "hex": "3C3F706870"
+      }
+    ]
+  },
+  {
+    "id": 14,
+    "extension": "pl",
+    "description": "Perl shebang",
+    "reliable": false,
+    "checkpoints": [
+      {
+        "offset": 0,
+        "hex": "2321"
+      }
+    ]
+  },
+  {
+    "id": 15,
+    "extension": "jar",
+    "description": "ZIP-based archive (JAR)",
+    "reliable": true,
+    "checkpoints": [
+      {
+        "offset": 0,
+        "hex": "504B0304"
+      }
+    ]
+  },
+  {
+    "id": 16,
+    "extension": "apk",
+    "description": "ZIP-based format (APK)",
+    "reliable": true,
+    "checkpoints": [
+      {
+        "offset": 0,
+        "hex": "504B0304"
+      }
+    ]
+  },
+  {
+    "id": 17,
+    "extension": "ipa",
+    "description": "ZIP-based format (IPA)",
+    "reliable": true,
+    "checkpoints": [
+      {
+        "offset": 0,
+        "hex": "504B0304"
+      }
+    ]
+  },
+  {
+    "id": 18,
+    "extension": "app",
+    "description": "ZIP-based app bundle",
+    "reliable": true,
+    "checkpoints": [
+      {
+        "offset": 0,
+        "hex": "504B0304"
+      }
+    ]
+  },
+  {
+    "id": 19,
+    "extension": "txt",
+    "description": "UTF-8 BOM",
+    "reliable": false,
+    "checkpoints": [
+      {
+        "offset": 0,
+        "hex": "EFBBBF"
+      }
+    ]
+  },
+  {
+    "id": 20,
+    "extension": "txt",
+    "description": "UTF-16LE BOM",
+    "reliable": false,
+    "checkpoints": [
+      {
+        "offset": 0,
+        "hex": "FFFE"
+      }
+    ]
+  },
+  {
+    "id": 21,
+    "extension": "txt",
+    "description": "UTF-16BE BOM",
+    "reliable": false,
+    "checkpoints": [
+      {
+        "offset": 0,
+        "hex": "FEFF"
+      }
+    ]
+  },
+  {
+    "id": 22,
+    "extension": "rtf",
+    "description": "RTF document header",
+    "reliable": true,
+    "checkpoints": [
+      {
+        "offset": 0,
+        "hex": "7B5C727466"
+      }
+    ]
+  },
+  {
+    "id": 23,
+    "extension": "pdf",
+    "description": "PDF document",
+    "reliable": true,
+    "checkpoints": [
+      {
+        "offset": 0,
+        "hex": "255044462D"
+      }
+    ]
+  },
+  {
+    "id": 24,
+    "extension": "doc",
+    "description": "Microsoft Compound File Binary Format",
+    "reliable": true,
+    "checkpoints": [
+      {
+        "offset": 0,
+        "hex": "D0CF11E0A1B11AE1"
+      }
+    ]
+  },
+  {
+    "id": 25,
+    "extension": "docx",
+    "description": "ZIP-based OOXML document",
+    "reliable": true,
+    "checkpoints": [
+      {
+        "offset": 0,
+        "hex": "504B0304"
+      }
+    ]
+  },
+  {
+    "id": 26,
+    "extension": "xls",
+    "description": "Microsoft Compound File Binary Format",
+    "reliable": true,
+    "checkpoints": [
+      {
+        "offset": 0,
+        "hex": "D0CF11E0A1B11AE1"
+      }
+    ]
+  },
+  {
+    "id": 27,
+    "extension": "xlsx",
+    "description": "ZIP-based OOXML document",
+    "reliable": true,
+    "checkpoints": [
+      {
+        "offset": 0,
+        "hex": "504B0304"
+      }
+    ]
+  },
+  {
+    "id": 28,
+    "extension": "ppt",
+    "description": "Microsoft Compound File Binary Format",
+    "reliable": true,
+    "checkpoints": [
+      {
+        "offset": 0,
+        "hex": "D0CF11E0A1B11AE1"
+      }
+    ]
+  },
+  {
+    "id": 29,
+    "extension": "pptx",
+    "description": "ZIP-based OOXML document",
+    "reliable": true,
+    "checkpoints": [
+      {
+        "offset": 0,
+        "hex": "504B0304"
+      }
+    ]
+  },
+  {
+    "id": 30,
+    "extension": "odt",
+    "description": "OpenDocument ZIP-based",
+    "reliable": true,
+    "checkpoints": [
+      {
+        "offset": 0,
+        "hex": "504B0304"
+      }
+    ]
+  },
+  {
+    "id": 31,
+    "extension": "ods",
+    "description": "OpenDocument ZIP-based",
+    "reliable": true,
+    "checkpoints": [
+      {
+        "offset": 0,
+        "hex": "504B0304"
+      }
+    ]
+  },
+  {
+    "id": 32,
+    "extension": "odp",
+    "description": "OpenDocument ZIP-based",
+    "reliable": true,
+    "checkpoints": [
+      {
+        "offset": 0,
+        "hex": "504B0304"
+      }
+    ]
+  },
+  {
+    "id": 33,
+    "extension": "jpg",
+    "description": "JPEG image format",
+    "reliable": true,
+    "checkpoints": [
+      {
+        "offset": 0,
+        "hex": "FFD8FF"
+      }
+    ]
+  },
+  {
+    "id": 34,
+    "extension": "png",
+    "description": "Portable Network Graphics",
+    "reliable": true,
+    "checkpoints": [
+      {
+        "offset": 0,
+        "hex": "89504E470D0A1A0A"
+      }
+    ]
+  },
+  {
+    "id": 35,
+    "extension": "gif",
+    "description": "GIF image format",
+    "reliable": true,
+    "checkpoints": [
+      {
+        "offset": 0,
+        "hex": "47494638"
+      }
+    ]
+  },
+  {
+    "id": 36,
+    "extension": "bmp",
+    "description": "BMP file",
+    "reliable": true,
+    "checkpoints": [
+      {
+        "offset": 0,
+        "hex": "424D"
+      }
+    ]
+  },
+  {
+    "id": 37,
+    "extension": "tiff",
+    "description": "TIFF little-endian",
+    "reliable": true,
+    "checkpoints": [
+      {
+        "offset": 0,
+        "hex": "49492A00"
+      }
+    ]
+  },
+  {
+    "id": 38,
+    "extension": "tiff",
+    "description": "TIFF big-endian",
+    "reliable": true,
+    "checkpoints": [
+      {
+        "offset": 0,
+        "hex": "4D4D002A"
+      }
+    ]
+  },
+  {
+    "id": 39,
+    "extension": "ico",
+    "description": "Windows icon file",
+    "reliable": true,
+    "checkpoints": [
+      {
+        "offset": 0,
+        "hex": "00000100"
+      }
+    ]
+  },
+  {
+    "id": 40,
+    "extension": "svg",
+    "description": "SVG XML file",
+    "reliable": false,
+    "checkpoints": [
+      {
+        "offset": 0,
+        "hex": "3C3F786D6C"
+      }
+    ]
+  },
+  {
+    "id": 41,
+    "extension": "webp",
+    "description": "WebP RIFF container",
+    "reliable": true,
+    "checkpoints": [
+      {
+        "offset": 0,
+        "hex": "52494646"
+      },
+      {
+        "offset": 8,
+        "hex": "57454250"
+      }
+    ]
+  },
+  {
+    "id": 42,
+    "extension": "mp4",
+    "description": "ISO Base Media file",
+    "reliable": true,
+    "checkpoints": [
+      {
+        "offset": 0,
+        "hex": "000000"
+      },
+      {
+        "offset": 4,
+        "hex": "66747970"
+      }
+    ]
+  },
+  {
+    "id": 43,
+    "extension": "avi",
+    "description": "AVI RIFF container",
+    "reliable": true,
+    "checkpoints": [
+      {
+        "offset": 0,
+        "hex": "52494646"
+      },
+      {
+        "offset": 8,
+        "hex": "41564920"
+      }
+    ]
+  },
+  {
+    "id": 44,
+    "extension": "mov",
+    "description": "QuickTime movie",
+    "reliable": true,
+    "checkpoints": [
+      {
+        "offset": 4,
+        "hex": "667479707174"
+      }
+    ]
+  },
+  {
+    "id": 45,
+    "extension": "mkv",
+    "description": "Matroska/WebM file",
+    "reliable": true,
+    "checkpoints": [
+      {
+        "offset": 0,
+        "hex": "1A45DFA3"
+      }
+    ]
+  },
+  {
+    "id": 46,
+    "extension": "flv",
+    "description": "Flash video file",
+    "reliable": true,
+    "checkpoints": [
+      {
+        "offset": 0,
+        "hex": "464C56"
+      }
+    ]
+  },
+  {
+    "id": 47,
+    "extension": "mp3",
+    "description": "MPEG audio frame header",
+    "reliable": true,
+    "checkpoints": [
+      {
+        "offset": 0,
+        "hex": "FF"
+      },
+      {
+        "offset": 1,
+        "hex_alternatives": [
+          "FB",
+          "F3",
+          "F2"
+        ]
+      }
+    ]
+  },
+  {
+    "id": 48,
+    "extension": "mp3",
+    "description": "MP3 with ID3v2 tag",
+    "reliable": true,
+    "checkpoints": [
+      {
+        "offset": 0,
+        "hex": "494433"
+      }
+    ]
+  },
+  {
+    "id": 49,
+    "extension": "wav",
+    "description": "WAVE RIFF container",
+    "reliable": true,
+    "checkpoints": [
+      {
+        "offset": 0,
+        "hex": "52494646"
+      },
+      {
+        "offset": 8,
+        "hex": "57415645"
+      }
+    ]
+  },
+  {
+    "id": 50,
+    "extension": "flac",
+    "description": "FLAC audio format",
+    "reliable": true,
+    "checkpoints": [
+      {
+        "offset": 0,
+        "hex": "664C6143"
+      }
+    ]
+  },
+  {
+    "id": 51,
+    "extension": "ogg",
+    "description": "Ogg container format",
+    "reliable": true,
+    "checkpoints": [
+      {
+        "offset": 0,
+        "hex": "4F676753"
+      }
+    ]
+  },
+  {
+    "id": 52,
+    "extension": "aac",
+    "description": "ADTS AAC audio",
+    "reliable": true,
+    "checkpoints": [
+      {
+        "offset": 0,
+        "hex": "FF"
+      },
+      {
+        "offset": 1,
+        "hex_alternatives": [
+          "F1",
+          "F9"
+        ]
+      }
+    ]
+  },
+  {
+    "id": 53,
+    "extension": "m4a",
+    "description": "MPEG-4 audio",
+    "reliable": true,
+    "checkpoints": [
+      {
+        "offset": 4,
+        "hex": "667479704D3441"
+      }
+    ]
+  },
+  {
+    "id": 54,
+    "extension": "zip",
+    "description": "ZIP archive",
+    "reliable": true,
+    "checkpoints": [
+      {
+        "offset": 0,
+        "hex": "504B0304"
+      }
+    ]
+  },
+  {
+    "id": 55,
+    "extension": "rar",
+    "description": "RAR archive v1.50+",
+    "reliable": true,
+    "checkpoints": [
+      {
+        "offset": 0,
+        "hex": "526172211A0700"
+      }
+    ]
+  },
+  {
+    "id": 56,
+    "extension": "rar",
+    "description": "RAR archive v5.00+",
+    "reliable": true,
+    "checkpoints": [
+      {
+        "offset": 0,
+        "hex": "526172211A070100"
+      }
+    ]
+  },
+  {
+    "id": 57,
+    "extension": "7z",
+    "description": "7-Zip file format",
+    "reliable": true,
+    "checkpoints": [
+      {
+        "offset": 0,
+        "hex": "377ABCAF271C"
+      }
+    ]
+  },
+  {
+    "id": 58,
+    "extension": "tar",
+    "description": "TAR ustar header",
+    "reliable": true,
+    "checkpoints": [
+      {
+        "offset": 257,
+        "hex": "7573746172"
+      }
+    ]
+  },
+  {
+    "id": 59,
+    "extension": "gz",
+    "description": "GZIP compressed file",
+    "reliable": true,
+    "checkpoints": [
+      {
+        "offset": 0,
+        "hex": "1F8B"
+      }
+    ]
+  },
+  {
+    "id": 60,
+    "extension": "bz2",
+    "description": "Bzip2 compressed file",
+    "reliable": true,
+    "checkpoints": [
+      {
+        "offset": 0,
+        "hex": "425A68"
+      }
+    ]
+  },
+  {
+    "id": 61,
+    "extension": "xz",
+    "description": "XZ compressed file",
+    "reliable": true,
+    "checkpoints": [
+      {
+        "offset": 0,
+        "hex": "FD377A585A00"
+      }
+    ]
+  },
+  {
+    "id": 62,
+    "extension": "iso",
+    "description": "ISO 9660 image",
+    "reliable": true,
+    "checkpoints": [
+      {
+        "offset": 32769,
+        "hex": "4344303031"
+      }
+    ]
+  },
+  {
+    "id": 63,
+    "extension": "log",
+    "description": "Log file starting with [",
+    "reliable": false,
+    "checkpoints": [
+      {
+        "offset": 0,
+        "hex": "5B"
+      }
+    ]
+  },
+  {
+    "id": 64,
+    "extension": "cfg",
+    "description": "Config file comment",
+    "reliable": false,
+    "checkpoints": [
+      {
+        "offset": 0,
+        "hex": "23"
+      }
+    ]
+  },
+  {
+    "id": 65,
+    "extension": "ini",
+    "description": "INI section header",
+    "reliable": false,
+    "checkpoints": [
+      {
+        "offset": 0,
+        "hex": "5B"
+      }
+    ]
+  },
+  {
+    "id": 66,
+    "extension": "json",
+    "description": "JSON object start",
+    "reliable": false,
+    "checkpoints": [
+      {
+        "offset": 0,
+        "hex": "7B"
+      }
+    ]
+  },
+  {
+    "id": 67,
+    "extension": "json",
+    "description": "JSON array start",
+    "reliable": false,
+    "checkpoints": [
+      {
+        "offset": 0,
+        "hex": "5B"
+      }
+    ]
+  },
+  {
+    "id": 68,
+    "extension": "xml",
+    "description": "XML declaration",
+    "reliable": false,
+    "checkpoints": [
+      {
+        "offset": 0,
+        "hex": "3C3F786D6C"
+      }
+    ]
+  },
+  {
+    "id": 69,
+    "extension": "yaml",
+    "description": "YAML comment header",
+    "reliable": false,
+    "checkpoints": [
+      {
+        "offset": 0,
+        "hex": "23"
+      }
+    ]
+  },
+  {
+    "id": 70,
+    "extension": "env",
+    "description": "Env file comment header",
+    "reliable": false,
+    "checkpoints": [
+      {
+        "offset": 0,
+        "hex": "23"
+      }
+    ]
+  },
+  {
+    "id": 71,
+    "extension": "sql",
+    "description": "SQL comment header",
+    "reliable": false,
+    "checkpoints": [
+      {
+        "offset": 0,
+        "hex": "2D2D"
+      }
+    ]
+  },
+  {
+    "id": 72,
+    "extension": "db",
+    "description": "SQLite database",
+    "reliable": true,
+    "checkpoints": [
+      {
+        "offset": 0,
+        "hex": "53514C69746520666F726D6174203300"
+      }
+    ]
+  },
+  {
+    "id": 73,
+    "extension": "mdb",
+    "description": "Microsoft Access database header",
+    "reliable": true,
+    "checkpoints": [
+      {
+        "offset": 0,
+        "hex": "00010000"
+      }
+    ]
+  },
+  {
+    "id": 74,
+    "extension": "csv",
+    "description": "CSV starting with quoted cell",
+    "reliable": false,
+    "checkpoints": [
+      {
+        "offset": 0,
+        "hex": "22"
+      }
+    ]
+  },
+  {
+    "id": 75,
+    "extension": "csv",
+    "description": "",
+    "reliable": false,
+    "checkpoints": [
+      {
+        "offset": 0,
+        "hex": "6964"
+      }
+    ]
+  },
+  {
+    "id": 76,
+    "extension": "tsv",
+    "description": "TSV starting with id + tab",
+    "reliable": false,
+    "checkpoints": [
+      {
+        "offset": 0,
+        "hex": "696474"
+      }
+    ]
+  },
+  {
+    "id": 77,
+    "extension": "html",
+    "description": "HTML doctype declaration",
+    "reliable": false,
+    "checkpoints": [
+      {
+        "offset": 0,
+        "hex": "3C21444F43545950452068746D6C"
+      }
+    ]
+  },
+  {
+    "id": 78,
+    "extension": "css",
+    "description": "CSS comment header",
+    "reliable": false,
+    "checkpoints": [
+      {
+        "offset": 0,
+        "hex": "2F2A"
+      }
+    ]
+  },
+  {
+    "id": 79,
+    "extension": "scss",
+    "description": "Sass comment header",
+    "reliable": false,
+    "checkpoints": [
+      {
+        "offset": 0,
+        "hex": "2F2A"
+      }
+    ]
+  },
+  {
+    "id": 80,
+    "extension": "txt",
+    "description": "Standard ASCII Text (Printable)",
+    "reliable": false,
+    "checkpoints": [
+      {
+        "offset": 0,
+        "hex": "202D7E0A0D5D"
+      }
+    ]
+  },
+  {
+    "id": 81,
+    "extension": "csv",
+    "description": "Standard ASCII CSV",
+    "reliable": false,
+    "checkpoints": [
+      {
+        "offset": 0,
+        "hex": "202D7E0A0D5D"
+      }
+    ]
+  },
+  {
+    "id": 82,
+    "extension": "xml",
+    "description": "Generic tag start",
+    "reliable": false,
+    "checkpoints": [
+      {
+        "offset": 0,
+        "hex": "3C"
+      }
+    ]
+  },
+  {
+    "id": 83,
+    "extension": "py",
+    "description": "Python import statement",
+    "reliable": false,
+    "checkpoints": [
+      {
+        "offset": 0,
+        "hex": "696D706F7274"
+      }
+    ]
+  },
+  {
+    "id": 84,
+    "extension": "py",
+    "description": "Python function definition",
+    "reliable": false,
+    "checkpoints": [
+      {
+        "offset": 0,
+        "hex": "646566"
+      }
+    ]
+  }
+]

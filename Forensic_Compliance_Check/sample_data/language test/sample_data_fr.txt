@@ -1,0 +1,26 @@
+INFORMATIONS PERSONNELLES
+Nom: Jean Dupont
+Email: jean.dupont@exemple.fr
+Téléphone: 01 23 45 67 89
+Numéro de sécurité sociale: 1 23 45 67 89 012 345
+Carte de crédit: 4978-1234-5678-9012
+Mot de passe: MonMotDePasseSecret456
+Clé API = xyz789abc123
+Jeton: jeton_secret_789
+
+CONFIDENTIEL ENTREPRISE
+Client: Société ABC
+Valeur du contrat: 2 500 000 €
+Date limite: 31 décembre 2024
+Notes internes: Ce projet nécessite une autorisation de sécurité spéciale.
+Identifiants base de données: admin:MotDePasseSecurise2024!
+
+INFORMATIONS EMPLOYÉS
+ID employé: EMP-12345
+Département: Marketing
+Gestionnaire: Marie Martin
+Contact d'urgence: 05 43 21 98 76
+Compte bancaire: 123456789
+Code guichet: 987654321
+
+Le renard brun rapide saute par-dessus le chien paresseux. Ceci est un document de test pour l'analyse forensique.

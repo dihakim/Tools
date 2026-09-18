@@ -1,0 +1,14 @@
+PERSONAL INFORMATION
+Name: John Smith
+Email: john.smith@example.com
+Phone: (555) 123-4567
+SSN: 123-45-6789
+Credit Card: 4111-1111-1111-1111
+Password: mySecretPassword123
+
+COMPANY CONFIDENTIAL
+API_KEY = abc123xyz789
+Token: secret_token_456
+
+The project deadline is December 31, 2024.
+Budget: $1,500,000

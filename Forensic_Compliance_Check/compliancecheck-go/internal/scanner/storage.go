@@ -135,19 +135,32 @@ func (s *StorageScanner) scanFile(path string) []model.Finding {
 	var out []model.Finding
 	ext := strings.TrimPrefix(filepath.Ext(path), ".")
 
+	// 0. Hidden file/folder check - visibility only, not inherently suspicious.
+	if isHiddenPath(path) {
+		f := model.NewFinding(model.CategoryStorage, "hidden_file", "Hidden file", model.SeverityLow)
+		f.Location = path
+		f.Source = "storage.hidden"
+		f.Detail = "File is hidden (Unix dot-prefix or Windows hidden attribute) - common and mostly benign, flagged for visibility/completeness."
+		out = append(out, f)
+	}
+
 	// 1. File signature check.
 	if ext != "" {
-		if res, err := s.FileSigDB.Check(path, ext); err == nil && res.KnownExt && !res.Matched {
+		if res, err := s.FileSigDB.Check(path, ext); err == nil && res.KnownExt && !res.Matched && !res.HeuristicMatched {
 			f := model.NewFinding(model.CategoryStorage, "file_signature_mismatch", "File signature mismatch", model.SeverityHigh)
 			f.Location = path
 			f.Source = "storage.filesig"
 			if res.ActualType != "" {
-				f.Detail = "File extension claims ." + ext + " but header bytes match " + res.ActualType + " instead."
+				f.Detail = "File extension claims ." + ext + " but header bytes match " + res.ActualType + " instead (" + res.ActualDescription + ")."
 			} else {
 				f.Detail = "File extension claims ." + ext + " but header bytes don't match any known signature for it."
 			}
 			f.Evidence["header_hex"] = res.HeaderHex
 			f.Evidence["actual_type"] = res.ActualType
+			f.Evidence["actual_description"] = res.ActualDescription
+			if res.HeuristicMatched {
+				f.Evidence["heuristic_note"] = "Also matched a lower-confidence heuristic signature for the claimed extension, but not a reliable one - still flagged as a mismatch."
+			}
 			out = append(out, f)
 		}
 	}

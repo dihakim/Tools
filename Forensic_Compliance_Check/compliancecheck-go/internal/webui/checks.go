@@ -25,6 +25,7 @@ type CheckDefinition struct {
 }
 
 var storageChecks = []CheckDefinition{
+	{ID: "hidden_files", Label: "Hidden files/folders", Prefixes: []string{"hidden_file"}},
 	{ID: "file_signature", Label: "File signature mismatch", Prefixes: []string{"file_signature_mismatch"}},
 	{ID: "pii", Label: "PII detection", Prefixes: []string{"pii_"}},
 	{ID: "encoded_content", Label: "Encoded content (base64/hex/etc.)", Prefixes: []string{"encoded_content_"}},

@@ -16,6 +16,7 @@ package langdata
 import (
 	"embed"
 	"encoding/csv"
+	"encoding/json"
 	"io/fs"
 	"strconv"
 	"strings"
@@ -28,7 +29,7 @@ var embedded embed.FS
 // an entry here still loads fine (Name falls back to the code itself) -
 // this is just for nicer display, not a gate on which languages can exist.
 var languageNames = map[string]string{
-	"en": "English", "fr": "French", "es": "Spanish", "de": "German",
+	"en": "English", "fr": "French", "es": "Spanish", "de": "German", "zh": "Chinese (Mandarin)", "ja": "Japanese",
 }
 
 var registry = map[string]*Language{}
@@ -81,13 +82,26 @@ func init() {
 			}
 			lang.addSentence(s)
 		})
+		loadDictionary(lang, "data/"+code+"/dictionary.json")
 
 		// Only register languages that actually have at least one dataset -
 		// an empty directory shouldn't produce a phantom language entry.
-		if lang.HasWords() || lang.HasBigrams() || lang.HasSentences() {
+		if lang.HasWords() || lang.HasBigrams() || lang.HasSentences() || lang.HasDictionary() {
 			registry[code] = lang
 		}
 	}
+}
+
+func loadDictionary(lang *Language, path string) {
+	b, err := embedded.ReadFile(path)
+	if err != nil {
+		return // no dictionary data for this language yet - not an error
+	}
+	var raw map[string]DictEntry
+	if json.Unmarshal(b, &raw) != nil {
+		return
+	}
+	lang.Dictionary = raw
 }
 
 func loadCSVInto(lang *Language, path string, onRecord func(rec []string)) {

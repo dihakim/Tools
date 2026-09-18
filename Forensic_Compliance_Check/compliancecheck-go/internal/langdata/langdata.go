@@ -86,6 +86,17 @@ func (s Sentence) Bigrams(lang *Language) []Bigram {
 	return out
 }
 
+// DictEntry is a dictionary lookup result - a rough gloss for one word/
+// character, sourced from real bilingual dictionary data (CC-CEDICT for
+// Chinese, a Wiktionary extract for Spanish, the Jōyō kanji list for
+// Japanese). Pinyin/Readings are populated only where the source data has
+// them (Chinese/Japanese respectively) - empty otherwise.
+type DictEntry struct {
+	Definitions []string `json:"definitions"`
+	Pinyin      string   `json:"pinyin,omitempty"`
+	Readings    string   `json:"readings,omitempty"`
+}
+
 // Language bundles one language's three datasets plus fast lookup
 // indices built once at load time.
 type Language struct {
@@ -96,9 +107,73 @@ type Language struct {
 	Bigrams   []Bigram
 	Sentences []Sentence
 
+	// Dictionary is an optional word/character -> gloss lookup, for the
+	// "rough translation" feature - see internal/translate. Not every
+	// language has this loaded; check HasDictionary() first.
+	Dictionary map[string]DictEntry
+
 	wordIdx     map[string]int
 	bigramIdx   map[string]int
 	sentenceIdx map[string]int
+}
+
+// HasDictionary reports whether gloss/definition data is loaded.
+func (l *Language) HasDictionary() bool { return len(l.Dictionary) > 0 }
+
+// Gloss looks up a word/character's rough definition.
+func (l *Language) Gloss(text string) (DictEntry, bool) {
+	e, ok := l.Dictionary[text]
+	return e, ok
+}
+
+// SegmentCJK does dictionary-based forward maximum-matching word
+// segmentation - the standard lightweight technique for CJK tokenization
+// without a full NLP library. At each position, it greedily takes the
+// LONGEST known word (from this Language's word list) starting there;
+// if nothing matches, it falls back to a single character. This is not a
+// real statistical/ML segmenter (no ambiguity resolution, no handling of
+// genuinely novel multi-character words absent from the dictionary), but
+// it's a legitimate, well-established baseline approach, and it's honest
+// about the difference: don't call this "the same as" langdetect's
+// space-based tokenize() for Latin-script languages, because it isn't -
+// this exists specifically because CJK text has no spaces between words,
+// so whitespace tokenization (used everywhere else in this codebase)
+// produces garbage for it.
+//
+// maxWordLen bounds how many runes ahead to try matching, to keep this
+// from being O(n^2) on pathological input - 8 covers virtually all real
+// Chinese words (most are 1-4 characters).
+const maxCJKWordLen = 8
+
+func (l *Language) SegmentCJK(text string) []string {
+	runes := []rune(text)
+	var out []string
+	i := 0
+	for i < len(runes) {
+		matched := false
+		maxLen := maxCJKWordLen
+		if i+maxLen > len(runes) {
+			maxLen = len(runes) - i
+		}
+		for length := maxLen; length >= 2; length-- {
+			candidate := string(runes[i : i+length])
+			if _, ok := l.Word(candidate); ok {
+				out = append(out, candidate)
+				i += length
+				matched = true
+				break
+			}
+		}
+		if !matched {
+			// Fall back to a single character - covers the very common
+			// case where the dictionary word IS just one character (which
+			// dominates this dataset: 我/的/你/了/是 etc.), and gives a
+			// sane default for anything genuinely unrecognized too.
+			out = append(out, string(runes[i]))
+			i++
+		}
+	}
+	return out
 }
 
 func newLanguage(code, name string) *Language {
@@ -109,7 +184,11 @@ func newLanguage(code, name string) *Language {
 }
 
 func (l *Language) addWord(w Word) {
-	l.wordIdx[strings.ToLower(w.Text)] = len(l.Words)
+	key := strings.ToLower(w.Text)
+	if existing, ok := l.wordIdx[key]; ok && l.Words[existing].Popularity >= w.Popularity {
+		return // a case-variant of this word is already indexed and more (or equally) popular - keep it
+	}
+	l.wordIdx[key] = len(l.Words)
 	l.Words = append(l.Words, w)
 }
 
@@ -118,12 +197,20 @@ func (l *Language) addBigram(b Bigram) {
 	if len(parts) == 2 {
 		b.First, b.Second = parts[0], parts[1]
 	}
-	l.bigramIdx[strings.ToLower(b.Text)] = len(l.Bigrams)
+	key := strings.ToLower(b.Text)
+	if existing, ok := l.bigramIdx[key]; ok && l.Bigrams[existing].Popularity >= b.Popularity {
+		return
+	}
+	l.bigramIdx[key] = len(l.Bigrams)
 	l.Bigrams = append(l.Bigrams, b)
 }
 
 func (l *Language) addSentence(s Sentence) {
-	l.sentenceIdx[strings.ToLower(s.Text)] = len(l.Sentences)
+	key := strings.ToLower(s.Text)
+	if existing, ok := l.sentenceIdx[key]; ok && l.Sentences[existing].Popularity >= s.Popularity {
+		return
+	}
+	l.sentenceIdx[key] = len(l.Sentences)
 	l.Sentences = append(l.Sentences, s)
 }
 

@@ -17,7 +17,15 @@ import (
 
 	"compliancecheck/internal/langdetect"
 	"compliancecheck/internal/ngram"
+	"compliancecheck/internal/pii"
 )
+
+// piiDetector supports the modest PII-structured-text boost applied to
+// crack candidates (see piiBoost): decoded "John Brown" or an email is weak
+// but real evidence a decode produced human content, on top of the
+// language-based validation that runs first. rules.json is tiny and
+// embedded, so sharing one detector package-wide is cheap.
+var piiDetector, _ = pii.Load()
 
 type CrackResult struct {
 	Method     string  `json:"method"`               // "caesar" | "rot13" | "atbash" | "vigenere"
@@ -36,12 +44,19 @@ func CrackClassical(text string, det *langdetect.Detector) (CrackResult, bool) {
 	found := false
 
 	consider := func(candidate CrackResult) {
-		lr := det.Detect(candidate.Plaintext)
-		if !validateCrackCandidate(candidate.Plaintext, lr) {
-			return
+		if !selfValidatedTransposition[candidate.Method] {
+			lr := det.Detect(candidate.Plaintext)
+			if !validateCrackCandidate(candidate.Plaintext, lr) {
+				return
+			}
+			candidate.Language = lr.Language
+			candidate.Confidence = capConfidence(lr.Confidence + piiBoost(candidate.Plaintext))
+		} else {
+			// Transposition self-validation already ran (digraph outlier +
+			// dictionary coverage); PII is just a modest extra edge for real
+			// content (a decoded name/email/IP is human text, not coincidence).
+			candidate.Confidence = capConfidence(candidate.Confidence + piiBoost(candidate.Plaintext))
 		}
-		candidate.Language = lr.Language
-		candidate.Confidence = lr.Confidence
 		if !found || candidate.Confidence > best.Confidence {
 			best = candidate
 			found = true
@@ -65,18 +80,69 @@ func CrackClassical(text string, det *langdetect.Detector) (CrackResult, bool) {
 		consider(CrackResult{Method: "vigenere", Key: key, Plaintext: decoded})
 	}
 
+	// Beaufort: same key-length detection, mirrored column recovery (see
+	// bestBeaufortColumnKey - Beaufort subtracts the key from the plaintext
+	// rather than adding it).
+	if key, ok := crackBeaufortKey(text, det); ok {
+		decoded := BeaufortDecode(text, key)
+		consider(CrackResult{Method: "beaufort", Key: key, Plaintext: decoded})
+	}
+
+	// Transpositions (rail fence / scytale / columnar) preserve letters but
+	// scramble their order, so they use their own validation gate (digraph
+	// outlier + dictionary coverage - see transposition.go) rather than the
+	// langdetect-based one above, which cannot see through space-free text.
+	if crack, ok := CrackRailFence(text, det); ok {
+		consider(crack)
+	}
+	if crack, ok := CrackScytale(text, det); ok {
+		consider(crack)
+	}
+	if crack, ok := CrackColumnar(text, det); ok {
+		consider(crack)
+	}
+
 	return best, found
+}
+
+// selfValidatedTransposition marks crack methods whose results were already
+// validated by their own gate (transposition.go's digraph-outlier +
+// dictionary-coverage check) rather than by langdetect - the normal
+// consider() validation cannot see through their space-free output.
+var selfValidatedTransposition = map[string]bool{
+	"railfence": true, "scytale": true, "columnar": true,
 }
 
 func crackVigenereKey(text string) (string, bool) {
 	letters := onlyLetters(text)
+	keyLen, ok := polyalphabeticKeyLength(letters)
+	if !ok {
+		return "", false
+	}
+	key := make([]byte, keyLen)
+	for col := 0; col < keyLen; col++ {
+		var stream []rune
+		for i := col; i < len(letters); i += keyLen {
+			stream = append(stream, letters[i])
+		}
+		key[col] = byte('A' + bestShiftForColumn(stream))
+	}
+	return string(key), true
+}
+
+// polyalphabeticKeyLength guesses the Vigenère-style key length by picking
+// the Index-of-Coincidence peak that stands clearly above the surrounding
+// noise floor (see indexOfCoincidence). Both Vigenère and Beaufort share
+// this detection: their columns are equally monoalphabetic at the true
+// period.
+func polyalphabeticKeyLength(letters []rune) (int, bool) {
 	if len(letters) < 100 {
 		// Index-of-Coincidence key-length detection needs enough letters per
 		// column to be statistically meaningful (well under this, short
 		// samples produce spurious peaks - as verified: a 65-letter sample
 		// falsely "detected" a 3-letter key here during testing). Below this
 		// length, don't guess - report no crack rather than a wrong one.
-		return "", false
+		return 0, false
 	}
 
 	type candidate struct {
@@ -112,7 +178,7 @@ func crackVigenereKey(text string) (string, bool) {
 	}
 	mean := sum / float64(len(candidates))
 	if best.avgIC < 0.058 || best.avgIC-mean < 0.01 {
-		return "", false
+		return 0, false
 	}
 
 	// Any multiple of the TRUE key length also shows elevated IC (each of its
@@ -132,19 +198,19 @@ func crackVigenereKey(text string) (string, bool) {
 		}
 	}
 
-	key := make([]byte, bestLength)
-	for col := 0; col < bestLength; col++ {
-		var stream []rune
-		for i := col; i < len(letters); i += bestLength {
-			stream = append(stream, letters[i])
-		}
-		key[col] = byte('A' + bestShiftForColumn(stream))
-	}
-	return string(key), true
+	return bestLength, true
 }
 
 // bestShiftForColumn finds the Caesar shift (0-25) that minimizes
 // chi-squared against English letter frequency for one Vigenère column.
+//
+// Unigram frequency (not digraphs) is deliberately used here: a column is
+// every N-th letter of the plaintext, so adjacent column letters are NOT
+// adjacent in the real text and digraph statistics don't apply - but the
+// per-letter distribution is preserved, which is exactly what unigrams
+// measure. (Attempted during testing and confirmed harmfully wrong: digraph
+// scoring mis-recovers columns because correct column decodes look
+// pseudo-random pairwise.)
 func bestShiftForColumn(column []rune) int {
 	bestShift := 0
 	bestScore := 1e18
@@ -158,6 +224,94 @@ func bestShiftForColumn(column []rune) int {
 		}
 	}
 	return bestShift
+}
+
+// bestBeaufortColumnKey guesses the Beaufort key letter for one column.
+// Beaufort's rule C = (K - P) is a mirror of Vigenère's, so the ciphertext
+// letter itself is inverted relative to plaintext and a shift-by-N on the
+// ciphertext does NOT land on the plaintext - the candidate plaintexts are
+// (K - C) for each key letter K instead of (C - s). (This is why Beaufort
+// needs its own column scorer even though it shares Vigenère's key-length
+// detection.)
+func bestBeaufortColumnKey(column []rune) int {
+	bestKey := 0
+	bestScore := 1e18
+	for k := 0; k < 26; k++ {
+		var b strings.Builder
+		for _, r := range column {
+			off := ((k-int(r-'a'))%26 + 26) % 26 // Go % keeps sign; normalize
+			b.WriteRune(rune('a' + off))
+		}
+		score := chiSquared(b.String())
+		if score < bestScore {
+			bestScore = score
+			bestKey = k
+		}
+	}
+	return bestKey
+}
+
+// bestLangScore returns the detector's highest stopword fraction across all
+// languages for text - the acceptance signal the crack ultimately gates on.
+func bestLangScore(det *langdetect.Detector, text string) float64 {
+	if det == nil {
+		return 0
+	}
+	res := det.Detect(text)
+	best := 0.0
+	for _, s := range res.Scores {
+		if s > best {
+			best = s
+		}
+	}
+	return best
+}
+
+// crackBeaufortKey recovers a Beaufort key with the same Index-of-
+// Coincidence length detection as Vigenère, then per-column key-letter
+// recovery via the mirrored scorer above. Short columns are inherently
+// noisy for chi-squared per-column scoring, so the initial guess is then
+// refined hill-climbing each key letter against the SAME signal the crack
+// ultimately gates on - the language detector's stopword fraction of the
+// fully SPACED decode (word boundaries matter; a letters-only string is a
+// single token and scores nothing). A wrong single column typically lowers
+// the whole-text score below the acceptance floor, so the climb homes in on
+// the English decode.
+func crackBeaufortKey(text string, det *langdetect.Detector) (string, bool) {
+	letters := onlyLetters(text)
+	keyLen, ok := polyalphabeticKeyLength(letters)
+	if !ok {
+		return "", false
+	}
+	key := make([]byte, keyLen)
+	for col := 0; col < keyLen; col++ {
+		var stream []rune
+		for i := col; i < len(letters); i += keyLen {
+			stream = append(stream, letters[i])
+		}
+		key[col] = byte('A' + bestBeaufortColumnKey(stream))
+	}
+	best := bestLangScore(det, BeaufortDecode(text, string(key)))
+	improved := true
+	for improved && det != nil {
+		improved = false
+		for col := 0; col < keyLen; col++ {
+			for k := byte('A'); k <= 'Z'; k++ {
+				if k == key[col] {
+					continue
+				}
+				old := key[col]
+				key[col] = k
+				if s := bestLangScore(det, BeaufortDecode(text, string(key))); s > best {
+					best = s
+					improved = true
+				} else {
+					key[col] = old
+				}
+			}
+		}
+	}
+	return string(key), true
 }
 
 // CrackVigenereOnly attempts only Vigenère cracking (used by the "decode
@@ -174,7 +328,27 @@ func CrackVigenereOnly(text string, det *langdetect.Detector) (CrackResult, bool
 	if lr.Language == "" || lr.Confidence < 0.20 {
 		return CrackResult{Method: "vigenere", Key: key, Plaintext: decoded}, false
 	}
-	return CrackResult{Method: "vigenere", Key: key, Plaintext: decoded, Language: lr.Language, Confidence: lr.Confidence}, true
+	return CrackResult{
+		Method: "vigenere", Key: key, Plaintext: decoded,
+		Language: lr.Language, Confidence: capConfidence(lr.Confidence + piiBoost(decoded)),
+	}, true
+}
+
+// CrackBeaufortOnly is the Beaufort counterpart to CrackVigenereOnly.
+func CrackBeaufortOnly(text string, det *langdetect.Detector) (CrackResult, bool) {
+	key, ok := crackBeaufortKey(text, det)
+	if !ok {
+		return CrackResult{}, false
+	}
+	decoded := BeaufortDecode(text, key)
+	lr := det.Detect(decoded)
+	if lr.Language == "" || lr.Confidence < 0.20 {
+		return CrackResult{Method: "beaufort", Key: key, Plaintext: decoded}, false
+	}
+	return CrackResult{
+		Method: "beaufort", Key: key, Plaintext: decoded,
+		Language: lr.Language, Confidence: capConfidence(lr.Confidence + piiBoost(decoded)),
+	}, true
 }
 
 // CaesarCandidate is one of the 26 possible Caesar shifts, scored so a UI
@@ -277,6 +451,30 @@ func validateCrackCandidate(plaintext string, lr langdetect.Result) bool {
 		}
 	}
 	return true
+}
+
+// piiBoost is a small extra confidence bump for decoded plaintext that
+// contains PII-shaped structure (emails, names, IDs, etc.), atop the
+// primary language-based validation. It weights human-signal evidence
+// less than word-frequency scoring, as it should.
+func piiBoost(plaintext string) float64 {
+	if piiDetector == nil {
+		return 0
+	}
+	return piiDetector.DecodeTextScore(plaintext)
+}
+
+// capConfidence keeps confidence from exceeding a single-digit-percent
+// ceiling (0.99) after the PII boost is added, so output like
+// "confidence 101%" never happens.
+func capConfidence(c float64) float64 {
+	if c > 0.99 {
+		return 0.99
+	}
+	if c < 0 {
+		return 0
+	}
+	return c
 }
 
 func itoa(n int) string {

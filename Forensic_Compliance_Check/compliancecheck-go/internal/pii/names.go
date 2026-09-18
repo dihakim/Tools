@@ -77,3 +77,30 @@ func DetectNames(text string) []NameMatch {
 	}
 	return out
 }
+
+// MatchNames converts detected name pairs into PII Match entries so names
+// flow through the SAME reporting channel as the regex rules (decode output,
+// analyze results, UI rendering). The rule ID is PERSON_NAME, matching the
+// entry ListRules adds to the PII-type picker. Value is kept readable - a
+// name prompt isn't a credential, and redacting it would hide exactly what
+// the user asked to be told about.
+func MatchNames(text string) []Match {
+	pairs := DetectNames(text)
+	if len(pairs) == 0 {
+		return nil
+	}
+	out := make([]Match, 0, len(pairs))
+	for _, n := range pairs {
+		out = append(out, Match{
+			RuleID:       "PERSON_NAME",
+			Label:        "Person name",
+			Severity:     "high",
+			BaseSeverity: "high",
+			Importance:   80,
+			Description:  "Person name (first + last name pair)",
+			Value:        n.Forename + " " + n.Surname,
+			Position:     n.Position,
+		})
+	}
+	return out
+}

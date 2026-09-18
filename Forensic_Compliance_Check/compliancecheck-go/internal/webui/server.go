@@ -20,11 +20,13 @@ import (
 
 	"compliancecheck/internal/cipher"
 	"compliancecheck/internal/forensics"
+	"compliancecheck/internal/langdata"
 	"compliancecheck/internal/langdetect"
 	"compliancecheck/internal/model"
 	"compliancecheck/internal/pii"
 	"compliancecheck/internal/report"
 	"compliancecheck/internal/scanner"
+	"compliancecheck/internal/translate"
 )
 
 //go:embed assets/index.html
@@ -88,7 +90,14 @@ func Serve(port int, onReady func(addr string)) error {
 		if len(targets) == 0 && req.Target != "" {
 			targets = []string{req.Target}
 		}
-		if len(targets) == 0 {
+		wantsFiles := len(req.Categories) == 0
+		for _, c := range req.Categories {
+			if c == "files" {
+				wantsFiles = true
+				break
+			}
+		}
+		if wantsFiles && len(targets) == 0 {
 			http.Error(w, "target is required", http.StatusBadRequest)
 			return
 		}
@@ -143,24 +152,35 @@ func Serve(port int, onReady func(addr string)) error {
 		json.NewEncoder(w).Encode(sharedPII.ListRules())
 	})
 
-	mux.HandleFunc("/api/cipher/analyze", jsonPostHandler(func(req struct{ Text string }) any {
-		return cipher.Analyze(req.Text, sharedLangDetect)
+	mux.HandleFunc("/api/cipher/analyze", jsonPostHandler(func(req struct {
+		Text string
+		Lang string // optional dictionary-gloss language hint ("" = auto)
+	}) any {
+		res := cipher.Analyze(req.Text, sharedLangDetect)
+		mergeTranslation(&res, req.Text, req.Lang)
+		return res
 	}))
 
 	mux.HandleFunc("/api/cipher/decode", jsonPostHandler(func(req struct {
-		Method string
-		Text   string
-		Key    string
+		Method  string
+		Text    string
+		Key     string
+		Variant string
 	}) any {
-		return cipher.Decode(req.Method, req.Text, req.Key, sharedLangDetect)
+		return cipher.Decode(req.Method, req.Text, req.Key, req.Variant, sharedLangDetect)
 	}))
 
 	mux.HandleFunc("/api/cipher/encode", jsonPostHandler(func(req struct {
-		Method string
-		Text   string
-		Key    string
+		Method  string
+		Text    string
+		Key     string
+		Variant string
 	}) any {
-		return cipher.Encode(req.Method, req.Text, req.Key)
+		return cipher.Encode(req.Method, req.Text, req.Key, req.Variant)
+	}))
+
+	mux.HandleFunc("/api/cipher/variants", jsonPostHandler(func(req struct{ Method string }) any {
+		return map[string]any{"method": req.Method, "variants": cipher.VariantsFor(req.Method)}
 	}))
 
 	mux.HandleFunc("/api/tools/hash", jsonPostHandler(func(req struct{ Path string }) any {
@@ -179,6 +199,29 @@ func Serve(port int, onReady func(addr string)) error {
 		return forensics.DecodeJWT(req.Token)
 	}))
 
+	mux.HandleFunc("/api/translate/languages", func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
+		var out []map[string]string
+		for _, code := range langdata.Codes() {
+			lang, _ := langdata.Get(code)
+			if lang.HasDictionary() {
+				out = append(out, map[string]string{"code": code, "name": lang.Name})
+			}
+		}
+		json.NewEncoder(w).Encode(out)
+	})
+
+	mux.HandleFunc("/api/translate", jsonPostHandler(func(req struct {
+		Text string
+		Lang string
+	}) any {
+		result, ok := translate.Translate(req.Text, req.Lang)
+		if !ok {
+			return map[string]any{"error": "no dictionary data available for language: " + req.Lang}
+		}
+		return result
+	}))
+
 	ln, err := net.Listen("tcp", fmt.Sprintf("127.0.0.1:%d", port))
 	if err != nil {
 		return err
@@ -191,6 +234,33 @@ func Serve(port int, onReady func(addr string)) error {
 	srv := &http.Server{Handler: mux}
 	log.SetOutput(logDiscard{}) // keep stdout clean for scripting; server errors still returned to caller
 	return srv.Serve(ln)
+}
+
+// mergeTranslation fills res.Translation with a rough dictionary gloss of
+// the input, merging the standalone Translate tool into the Analyze & Decode
+// flow: an explicit language hint always glosses; otherwise a recognized
+// input language glosses in that language; otherwise (input not recognized,
+// no classical crack found) we auto-pick the dictionary language with the
+// best coverage - the "this might be an unsupported language" fallback that
+// turns the old dead-end message into an actual dictionary rendering.
+func mergeTranslation(res *cipher.AnalyzeResult, text, lang string) {
+	if lang != "" {
+		if t, ok := translate.Translate(text, lang); ok {
+			res.Translation = &t
+		}
+		return
+	}
+	if res.InputLanguage != nil {
+		if t, ok := translate.Translate(text, res.InputLanguage.Language); ok {
+			res.Translation = &t
+		}
+		return
+	}
+	if res.ClassicalCrack == nil {
+		if t, ok := translate.TranslateAuto(text); ok {
+			res.Translation = &t
+		}
+	}
 }
 
 type logDiscard struct{}
